@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'emotion-theming';
 import { PersistGate } from 'redux-persist/integration/react';
-import { AppContainer } from 'react-hot-loader';
 
 import configureStore from 'store/configureStore';
 import { theme } from 'styles';
@@ -20,9 +19,7 @@ const render = (AppComponent: React.ComponentType) => {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <PersistGate loading={null} persistor={persistor}>
-          <AppContainer>
-            <AppComponent />
-          </AppContainer>
+          <AppComponent />
         </PersistGate>
       </ThemeProvider>
     </Provider>,

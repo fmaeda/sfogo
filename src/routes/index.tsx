@@ -1,4 +1,3 @@
-import { hot } from 'react-hot-loader';
 import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
 import { createHashHistory } from 'history';
@@ -22,4 +21,4 @@ class MainRoute extends React.Component {
   }
 }
 
-export default hot(module)(MainRoute);
+export default MainRoute;
