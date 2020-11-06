@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/sfogo/static/css/main.7b5b6b01.chunk.css",
-    "main.js": "/sfogo/static/js/main.cf53e427.chunk.js",
-    "main.js.map": "/sfogo/static/js/main.cf53e427.chunk.js.map",
+    "main.css": "/sfogo/static/css/main.d9ab9e37.chunk.css",
+    "main.js": "/sfogo/static/js/main.b8362bce.chunk.js",
+    "main.js.map": "/sfogo/static/js/main.b8362bce.chunk.js.map",
     "runtime-main.js": "/sfogo/static/js/runtime-main.2108a10d.js",
     "runtime-main.js.map": "/sfogo/static/js/runtime-main.2108a10d.js.map",
-    "static/js/2.2390defd.chunk.js": "/sfogo/static/js/2.2390defd.chunk.js",
-    "static/js/2.2390defd.chunk.js.map": "/sfogo/static/js/2.2390defd.chunk.js.map",
+    "static/js/2.67fee163.chunk.js": "/sfogo/static/js/2.67fee163.chunk.js",
+    "static/js/2.67fee163.chunk.js.map": "/sfogo/static/js/2.67fee163.chunk.js.map",
     "index.html": "/sfogo/index.html",
-    "static/css/main.7b5b6b01.chunk.css.map": "/sfogo/static/css/main.7b5b6b01.chunk.css.map",
-    "static/js/2.2390defd.chunk.js.LICENSE.txt": "/sfogo/static/js/2.2390defd.chunk.js.LICENSE.txt",
+    "static/css/main.d9ab9e37.chunk.css.map": "/sfogo/static/css/main.d9ab9e37.chunk.css.map",
+    "static/js/2.67fee163.chunk.js.LICENSE.txt": "/sfogo/static/js/2.67fee163.chunk.js.LICENSE.txt",
     "static/media/bg-pattern.a4e6cf7d.svg": "/sfogo/static/media/bg-pattern.a4e6cf7d.svg",
     "static/media/sisfogo.5658165b.svg": "/sfogo/static/media/sisfogo.5658165b.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.2108a10d.js",
-    "static/js/2.2390defd.chunk.js",
-    "static/css/main.7b5b6b01.chunk.css",
-    "static/js/main.cf53e427.chunk.js"
+    "static/js/2.67fee163.chunk.js",
+    "static/css/main.d9ab9e37.chunk.css",
+    "static/js/main.b8362bce.chunk.js"
   ]
 }
