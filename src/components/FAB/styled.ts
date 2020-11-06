@@ -17,8 +17,8 @@ export const Container = styled.div`
   transition: all 0.2s ease-in-out;
   /* border: solid red; */
   padding: 12px;
-  width: 40px;
-  height: 40px;
+  /* width: 40px;
+  height: 40px; */
   cursor: pointer;
   :active {
     background-image: -webkit-radial-gradient(
@@ -35,12 +35,4 @@ export const Glass = styled.div`
   padding: 6px;
   border-radius: 100px;
   box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
-`;
-
-export const PlusContainer = styled.div`
-  position: absolute;
-  font-size: 16px;
-  bottom: 12px;
-  right: 16px;
-  filter: drop-shadow(0px 2px 0px rgba(0, 0, 0, 0.5));
 `;
