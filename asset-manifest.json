@@ -1,24 +1,24 @@
 {
   "files": {
     "main.css": "/sfogo/static/css/main.d9ab9e37.chunk.css",
-    "main.js": "/sfogo/static/js/main.d5a6fdab.chunk.js",
-    "main.js.map": "/sfogo/static/js/main.d5a6fdab.chunk.js.map",
+    "main.js": "/sfogo/static/js/main.cb5a6607.chunk.js",
+    "main.js.map": "/sfogo/static/js/main.cb5a6607.chunk.js.map",
     "runtime-main.js": "/sfogo/static/js/runtime-main.2108a10d.js",
     "runtime-main.js.map": "/sfogo/static/js/runtime-main.2108a10d.js.map",
-    "static/js/2.1e718a96.chunk.js": "/sfogo/static/js/2.1e718a96.chunk.js",
-    "static/js/2.1e718a96.chunk.js.map": "/sfogo/static/js/2.1e718a96.chunk.js.map",
+    "static/js/2.3b079e39.chunk.js": "/sfogo/static/js/2.3b079e39.chunk.js",
+    "static/js/2.3b079e39.chunk.js.map": "/sfogo/static/js/2.3b079e39.chunk.js.map",
     "index.html": "/sfogo/index.html",
     "service-worker.js": "/sfogo/service-worker.js",
     "service-worker.js.map": "/sfogo/service-worker.js.map",
     "static/css/main.d9ab9e37.chunk.css.map": "/sfogo/static/css/main.d9ab9e37.chunk.css.map",
-    "static/js/2.1e718a96.chunk.js.LICENSE.txt": "/sfogo/static/js/2.1e718a96.chunk.js.LICENSE.txt",
+    "static/js/2.3b079e39.chunk.js.LICENSE.txt": "/sfogo/static/js/2.3b079e39.chunk.js.LICENSE.txt",
     "static/media/bg-pattern.a4e6cf7d.svg": "/sfogo/static/media/bg-pattern.a4e6cf7d.svg",
     "static/media/sisfogo.5658165b.svg": "/sfogo/static/media/sisfogo.5658165b.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.2108a10d.js",
-    "static/js/2.1e718a96.chunk.js",
+    "static/js/2.3b079e39.chunk.js",
     "static/css/main.d9ab9e37.chunk.css",
-    "static/js/main.d5a6fdab.chunk.js"
+    "static/js/main.cb5a6607.chunk.js"
   ]
 }
