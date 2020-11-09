@@ -1,2 +1,0 @@
-(this["webpackJsonpsisfogo-geo"]=this["webpackJsonpsisfogo-geo"]||[]).push([[3],{137:function(s,o,e){"use strict";e.r(o);var i=e(4);e(1);o.default=function(){return Object(i.jsx)("div",{children:"Code Split 2"})}}}]);
-//# sourceMappingURL=3.6da706dd.chunk.js.map
