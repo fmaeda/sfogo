@@ -10,7 +10,8 @@ import { theme } from 'styles';
 import './index.css';
 import App from 'App';
 
-import * as serviceWorker from './serviceWorker';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import { versionActions } from 'store/version';
 
 const { store, persistor } = configureStore();
 
@@ -32,4 +33,13 @@ render(App);
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+serviceWorkerRegistration.register({
+  onSuccess: (evt) => {
+    store.dispatch(versionActions.init());
+    console.log('SW_init', evt);
+  },
+  onUpdate: (evt) => {
+    console.log('SW_update', evt);
+    store.dispatch(versionActions.update(evt));
+  },
+});

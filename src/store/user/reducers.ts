@@ -10,7 +10,7 @@ const DEFAULT_STATE: State = {
 };
 
 const reducer: Reducer<State, Action> = (state = DEFAULT_STATE, action) =>
-  produce(state, draft => {
+  produce(state, (draft) => {
     switch (action.type) {
       case ActionTypes.SET_LOGIN: {
         draft.login = action.payload.login;

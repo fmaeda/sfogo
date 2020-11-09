@@ -16,7 +16,7 @@ const rootReducer = (persistReducer(
   {
     key: 'ibama',
     storage: sessionStorage,
-    blacklist: ['layer'],
+    blacklist: ['layer', 'version'],
   },
   combineReducers({ ...allReducers }),
 ) as unknown) as Reducer<RootState>;

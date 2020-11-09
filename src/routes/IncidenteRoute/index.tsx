@@ -8,53 +8,31 @@ import ReactMapGL, {
 } from 'react-map-gl';
 import qs from 'qs';
 import axios, { AxiosResponse } from 'axios';
-import {
-  FaFireExtinguisher,
-  FaLayerGroup,
-  FaMapMarkerAlt,
-  FaTimes,
-  FaCheck,
-} from 'react-icons/fa';
+import { FaLayerGroup, FaMapMarkerAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { GiHamburgerMenu } from 'react-icons/gi';
-import { MdChevronLeft, MdMyLocation } from 'react-icons/md';
 import { FiRefreshCcw } from 'react-icons/fi';
 import { easeCubic } from 'd3-ease';
-import {
-  Editor,
-  DrawPolygonMode,
-  DrawPointMode,
-  EditingMode,
-  RENDER_STATE,
-} from 'react-map-gl-draw';
 import BottomDrawer from 'components/BottomDrawer';
-import { Feature } from '@nebula.gl/edit-modes';
 import FireIcon from 'components/FireIcon';
 import FAB from 'components/FAB';
 
 import {
   TopBar,
-  Logo,
-  BlurryPanel,
   ActionButtons,
   SearchContainer,
-  ButtonBar,
-  MenuContainer,
-  Container,
-  Header,
-  MapContainer,
   Content,
-  SideBar,
   FabContainer,
   MarkerContainer,
   HintContainer,
   ConfirmContainer,
   DrawerContent,
+  MapContainer,
 } from './styled';
-import sisfogoLogo from 'resources/svg/sisfogo.svg';
 import SearchBox, { Result } from 'components/SearchBox';
 import Address from 'components/Address';
 import NivelAcionamentoPicker from 'components/NivelAcionamentoPicker';
 import { NivelAcionamento } from 'model/nivelAcionamento';
+import { MdMyLocation } from 'react-icons/md';
 
 enum EditMode {
   NONE,
@@ -68,33 +46,16 @@ type LatLon = {
 };
 
 type AddressDetails = {
-  // country: string;
   state: string;
   addresstype: string;
-
-  // city?: string;
-  // town?: string;
-  // village?: string;
-  // county?: string;
-
-  // suburb?: string;
-  // neighbourhood?: string;
-
-  // aeroway?: string;
-  // leisure?: string;
-  // building?: string;
-  // natural?: string;
-  // shop?: string;
-  // amenity?: string;
-  // office?: string;
-  // residential?: string;
 } & Record<string, string>;
 
-type Props = {};
+type Props = {
+  onMenuClick: () => void;
+};
 
 type State = {
   viewport: Partial<ViewportProps>;
-  drawerOpen: boolean;
   bottomDrawerOpen: boolean;
   editMode: EditMode;
   currentAddress?: {
@@ -117,7 +78,7 @@ const getCity = (address: AddressDetails): string => {
   return address.city ?? address.town ?? address.village ?? '';
 };
 
-class MapRoute extends React.Component<Props, State> {
+class IncidenteRoute extends React.Component<Props, State> {
   state: State = {
     viewport: {
       longitude: -47.708052,
@@ -126,7 +87,6 @@ class MapRoute extends React.Component<Props, State> {
       bearing: 0,
       pitch: 0,
     },
-    drawerOpen: false,
     bottomDrawerOpen: false,
     editMode: EditMode.NONE,
   };
@@ -161,13 +121,6 @@ class MapRoute extends React.Component<Props, State> {
     this.setState({
       viewport,
     });
-  };
-
-  toggleDrawer = (): void => {
-    this.setState(({ drawerOpen, ...rest }) => ({
-      ...rest,
-      drawerOpen: !drawerOpen,
-    }));
   };
 
   handleCurrentLocationClick = async (): Promise<void> => {
@@ -378,138 +331,114 @@ class MapRoute extends React.Component<Props, State> {
   render(): JSX.Element {
     const {
       viewport,
-      drawerOpen,
       editMode,
       markerLatLon,
       bottomDrawerOpen,
       currentAddress,
       nivelAcionamento,
     } = this.state;
+    const { onMenuClick } = this.props;
     // console.log('markerLatLon', markerLatLon);
 
     return (
-      <Container>
-        <MenuContainer>
-          <SideBar drawerOpen={drawerOpen}>
-            <MdChevronLeft onClick={this.toggleDrawer} />
-          </SideBar>
-          <Header>
-            <Logo src={sisfogoLogo} />
-          </Header>
-        </MenuContainer>
-        <Content drawerOpen={drawerOpen}>
-          <MapContainer drawerOpen={drawerOpen}>
-            <TopBar>
-              <GiHamburgerMenu
-                size={20}
-                // color="black"
-                onClick={this.toggleDrawer}
-              />
-              <h3>Registro de Incidente</h3>
-              <GiHamburgerMenu size={20} color="transparent" />
-            </TopBar>
-            {!bottomDrawerOpen && (
-              <SearchContainer>
-                <SearchBox onSelect={this.handleResultSelect} />
-              </SearchContainer>
-            )}
-            <ReactMapGL
-              width="100%"
-              height={bottomDrawerOpen ? '50%' : '"100%"'}
-              ref={this.mapRef}
-              {...viewport}
-              onViewportChange={this.handleViewportChange}
-              onClick={this.handleMapClick}
-              // onResize={() => this.m apRef.current?.getMap().resize()}
-              // onResize={() => console.log('resize')}
-              mapStyle={{
-                version: 8,
-                sources: {
-                  osm: {
-                    type: 'raster',
-                    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-                    tileSize: 256,
-                    attribution:
-                      // eslint-disable-next-line max-len
-                      'Map tiles by <a target="_top" rel="noopener" href="https://tile.openstreetmap.org/">OpenStreetMap tile servers</a>, under the <a target="_top" rel="noopener" href="https://operations.osmfoundation.org/policies/tiles/">tile usage policy</a>. Data by <a target="_top" rel="noopener" href="http://openstreetmap.org">OpenStreetMap</a>',
-                  },
+      <Content>
+        <TopBar>
+          <GiHamburgerMenu size={20} color="white" onClick={onMenuClick} />
+          <h3>Registro de Incidente</h3>
+          <GiHamburgerMenu size={20} color="transparent" />
+        </TopBar>
+        {!bottomDrawerOpen && (
+          <SearchContainer>
+            <SearchBox onSelect={this.handleResultSelect} />
+          </SearchContainer>
+        )}
+        <MapContainer>
+          <ReactMapGL
+            width="100%"
+            height={bottomDrawerOpen ? '50%' : '"100%"'}
+            ref={this.mapRef}
+            {...viewport}
+            onViewportChange={this.handleViewportChange}
+            onClick={this.handleMapClick}
+            mapStyle={{
+              version: 8,
+              sources: {
+                osm: {
+                  type: 'raster',
+                  tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                  tileSize: 256,
+                  attribution:
+                    // eslint-disable-next-line max-len
+                    'Map tiles by <a target="_top" rel="noopener" href="https://tile.openstreetmap.org/">OpenStreetMap tile servers</a>, under the <a target="_top" rel="noopener" href="https://operations.osmfoundation.org/policies/tiles/">tile usage policy</a>. Data by <a target="_top" rel="noopener" href="http://openstreetmap.org">OpenStreetMap</a>',
                 },
-                layers: [
-                  {
-                    id: 'osm',
-                    type: 'raster',
-                    source: 'osm',
-                    minzoom: 0,
-                    maxzoom: 22,
-                  },
-                ],
-              }}
-            >
-              {markerLatLon && (
-                <Marker
-                  {...markerLatLon}
-                  draggable={editMode === EditMode.SET_MARKER}
-                >
-                  <MarkerContainer onClick={() => console.log('marker click')}>
-                    <FaMapMarkerAlt />
-                  </MarkerContainer>
-                </Marker>
-              )}
-            </ReactMapGL>
-            <ActionButtons>
-              <FaLayerGroup size={20} />
-              <MdMyLocation
-                size={20}
-                onClick={this.handleCurrentLocationClick}
-              />
-            </ActionButtons>
-            <FabContainer>{this.renderFabArea()}</FabContainer>
-            {drawerOpen && (
-              <BlurryPanel
-                onClick={() => this.setState({ drawerOpen: false })}
+              },
+              layers: [
+                {
+                  id: 'osm',
+                  type: 'raster',
+                  source: 'osm',
+                  minzoom: 0,
+                  maxzoom: 22,
+                },
+              ],
+            }}
+          >
+            {markerLatLon && (
+              <Marker
+                {...markerLatLon}
+                draggable={editMode === EditMode.SET_MARKER}
+              >
+                <MarkerContainer onClick={() => console.log('marker click')}>
+                  <FaMapMarkerAlt />
+                </MarkerContainer>
+              </Marker>
+            )}
+          </ReactMapGL>
+        </MapContainer>
+        <ActionButtons>
+          <FaLayerGroup size={20} />
+          <MdMyLocation size={20} onClick={this.handleCurrentLocationClick} />
+        </ActionButtons>
+        <FabContainer>{this.renderFabArea()}</FabContainer>
+        <BottomDrawer
+          isVisible={bottomDrawerOpen}
+          onClose={this.handleBottomDrawerClose}
+        >
+          <DrawerContent>
+            {currentAddress && (
+              <Address
+                uf={currentAddress.uf}
+                municipio={currentAddress.municipio}
+                descricao={currentAddress.descricao}
               />
             )}
-            <BottomDrawer
-              isVisible={bottomDrawerOpen}
-              onClose={this.handleBottomDrawerClose}
-            >
-              <DrawerContent>
-                {currentAddress && (
-                  <Address
-                    uf={currentAddress.uf}
-                    municipio={currentAddress.municipio}
-                    descricao={currentAddress.descricao}
-                  />
-                )}
-                <h3>Qual o Nível de Acionamento?</h3>
-                <NivelAcionamentoPicker
-                  onSelect={this.handleNivelAcionamento}
-                  selected={nivelAcionamento}
-                />
-                {nivelAcionamento && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      flex: 1,
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      marginBottom: 12,
-                    }}
-                  >
-                    <FiRefreshCcw size={40} onClick={this.reset} />
-                    <span style={{ textAlign: 'center', marginTop: 8 }}>
-                      Reiniciar fluxo <br /> (falta implementar próximas telas)
-                    </span>
-                  </div>
-                )}
-              </DrawerContent>
-            </BottomDrawer>
-          </MapContainer>
-        </Content>
-      </Container>
+            <h3>Qual o Nível de Acionamento?</h3>
+            <NivelAcionamentoPicker
+              onSelect={this.handleNivelAcionamento}
+              selected={nivelAcionamento}
+            />
+            {nivelAcionamento && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  marginBottom: 12,
+                }}
+              >
+                <FiRefreshCcw size={40} onClick={this.reset} />
+                <span style={{ textAlign: 'center', marginTop: 8 }}>
+                  Reiniciar fluxo <br /> (falta implementar próximas telas)
+                </span>
+              </div>
+            )}
+          </DrawerContent>
+        </BottomDrawer>
+      </Content>
     );
   }
 }
 
-export default MapRoute;
+export default IncidenteRoute;

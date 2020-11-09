@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import thunk from 'redux-thunk';
 
 /**

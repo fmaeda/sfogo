@@ -2,24 +2,17 @@ import styled from 'styles';
 import Color from 'color';
 
 export const Container = styled.div`
-  position: relative;
+  /* position: absolute; */
+  /* top: 50%; */
+  /* left: 20px; */
   display: flex;
   flex-direction: column;
   flex: 1;
   align-items: center;
-  /* justify-content: center; */
+  align-self: stretch;
+  padding: 20px;
+  /* justify-content: flex-start; */
   /* border: solid yellow; */
-`;
-
-export const Content = styled.div`
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 100%;
-  align-items: center;
-  justify-content: center;
 `;
 
 type ItemProps = {
@@ -27,13 +20,16 @@ type ItemProps = {
   color: string;
 };
 export const ItemContainer = styled.div<ItemProps>`
-  position: relative;
+  /* position: relative; */
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   align-self: stretch;
-  margin: 8px 0 8px 2px;
-  padding: 12px 0;
+  user-select: none;
+  /* margin: 8px 0 8px 2px; */
+  padding: 8px 0;
+  /* margin: 2px 0; */
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   color: rgba(255, 255, 255, 0.5);
@@ -45,29 +41,22 @@ export const ItemContainer = styled.div<ItemProps>`
   > svg {
     font-size: 24px;
   }
-  ${({ active }) =>
-    active
-      ? `
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0px 20px 0px rgba(0, 0, 0, 0.2);
-    color: white;
-    cursor: default;
-  `
-      : `
-    :hover {
-      color: whitesmoke;
-      > div {
-        background: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 0 4px 0px rgba(255, 255, 255, 0.2);
-      }
-    }
-  `}
+
+  :hover {
+    cursor: pointer;
+  }
+`;
+export const ItemLabel = styled.div`
+  display: flex;
+  flex-direction: row;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 300;
+  margin-left: 16px;
 `;
 
 export const Spacer = styled.div`
-  height: 1px;
-  background: rgba(255, 255, 255, 0.2);
-  width: 70%;
+  flex: 1;
 `;
 
 export const SelectedMarker = styled.div<ItemProps>`
@@ -84,4 +73,17 @@ export const SelectedMarker = styled.div<ItemProps>`
       background: ${Color(color).lighten(0.1).hex()};
       box-shadow: 0 0 4px 0px ${color};
   `};
+`;
+
+export const Footer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  align-items: center;
+  /* border: solid red; */
+`;
+
+export const Logo = styled.img`
+  width: 52px;
+  margin: 22px 8px;
 `;

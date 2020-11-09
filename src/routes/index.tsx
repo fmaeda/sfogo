@@ -1,24 +1,25 @@
 import React from 'react';
-import { Router, Route, Switch } from 'react-router-dom';
-import { createHashHistory } from 'history';
 
-import MapRoute from './MapRoute';
-import HomeRoute from './HomeRoute';
-import ProductsRoute from './ProductsRoute';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
-const history = createHashHistory({ hashType: 'hashbang' });
+import IncidenteRoute from './IncidenteRoute';
 
-class MainRoute extends React.Component {
+type Props = {
+  onMenuClick: () => void;
+};
+
+class MainRoute extends React.Component<Props> {
   render(): JSX.Element {
+    const { onMenuClick } = this.props;
     return (
-      <Router history={history}>
-        <Switch>
-          <Route path="/map" component={MapRoute} />
-          <Route path="/home" component={HomeRoute} />
-          <Route path="/products" component={ProductsRoute} />
-          <Route path="/" component={MapRoute} />
-        </Switch>
-      </Router>
+      <Switch>
+        <Route path="/incidente">
+          <IncidenteRoute onMenuClick={onMenuClick} />
+        </Route>
+        <Route path="/">
+          <Redirect to="/incidente" />
+        </Route>
+      </Switch>
     );
   }
 }
