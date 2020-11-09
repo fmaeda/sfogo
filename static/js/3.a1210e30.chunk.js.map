@@ -1,0 +1,1 @@
+{"version":3,"sources":["components/Menu/CodeSplit.tsx"],"names":[],"mappings":"yIAEe,4BAAmB","file":"static/js/3.a1210e30.chunk.js","sourcesContent":["import React from 'react';\n\nexport default (): JSX.Element => <div>Code Split</div>;\n"],"sourceRoot":""}
