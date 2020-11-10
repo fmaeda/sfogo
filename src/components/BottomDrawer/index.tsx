@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Drawer from 'react-bottom-drawer';
+import Drawer from './Drawer';
 
 import { Container, Content } from './styled';
 

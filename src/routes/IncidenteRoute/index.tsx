@@ -9,7 +9,6 @@ import ReactMapGL, {
 import qs from 'qs';
 import axios, { AxiosResponse } from 'axios';
 import { FaLayerGroup, FaMapMarkerAlt, FaTimes, FaCheck } from 'react-icons/fa';
-import { GiHamburgerMenu } from 'react-icons/gi';
 import { FiRefreshCcw } from 'react-icons/fi';
 import { easeCubic } from 'd3-ease';
 import BottomDrawer from 'components/BottomDrawer';
@@ -17,7 +16,6 @@ import FireIcon from 'components/FireIcon';
 import FAB from 'components/FAB';
 
 import {
-  TopBar,
   ActionButtons,
   SearchContainer,
   Content,
@@ -33,6 +31,7 @@ import Address from 'components/Address';
 import NivelAcionamentoPicker from 'components/NivelAcionamentoPicker';
 import { NivelAcionamento } from 'model/nivelAcionamento';
 import { MdMyLocation } from 'react-icons/md';
+import AppBar from 'components/AppBar';
 
 enum EditMode {
   NONE,
@@ -50,9 +49,7 @@ type AddressDetails = {
   addresstype: string;
 } & Record<string, string>;
 
-type Props = {
-  onMenuClick: () => void;
-};
+type Props = {};
 
 type State = {
   viewport: Partial<ViewportProps>;
@@ -337,16 +334,12 @@ class IncidenteRoute extends React.Component<Props, State> {
       currentAddress,
       nivelAcionamento,
     } = this.state;
-    const { onMenuClick } = this.props;
     // console.log('markerLatLon', markerLatLon);
 
     return (
       <Content>
-        <TopBar>
-          <GiHamburgerMenu size={20} color="white" onClick={onMenuClick} />
-          <h3>Registro de Incidente</h3>
-          <GiHamburgerMenu size={20} color="transparent" />
-        </TopBar>
+        <AppBar title="Registro de Incidente" />
+
         {!bottomDrawerOpen && (
           <SearchContainer>
             <SearchBox onSelect={this.handleResultSelect} />

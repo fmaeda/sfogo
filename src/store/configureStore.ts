@@ -14,9 +14,9 @@ import allReducers, { RootState } from 'store';
 
 const rootReducer = (persistReducer(
   {
-    key: 'ibama',
+    key: 'sisfogo',
     storage: sessionStorage,
-    blacklist: ['layer', 'version'],
+    blacklist: ['notification', 'version'],
   },
   combineReducers({ ...allReducers }),
 ) as unknown) as Reducer<RootState>;

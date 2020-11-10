@@ -113,4 +113,5 @@ export const Version = styled.div`
   position: absolute;
   bottom: 8px;
   left: 8px;
+  background: rgba(255, 255, 255, 0.5);
 `;

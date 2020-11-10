@@ -31,3 +31,5 @@ export const versionReducer = createReducerFunction(
   VersionReducer,
   DEFAULT_STATE,
 );
+
+export { default as versionThunks } from './thunks';

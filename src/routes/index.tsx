@@ -3,21 +3,25 @@ import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
 import IncidenteRoute from './IncidenteRoute';
+import ConfiguracoesRoute from './ConfiguracoesRoute';
+import CombateRoute from './CombateRoute';
+import { menuRoutes, Menu } from 'model/menu';
 
-type Props = {
-  onMenuClick: () => void;
-};
+type Props = {};
 
 class MainRoute extends React.Component<Props> {
   render(): JSX.Element {
-    const { onMenuClick } = this.props;
     return (
       <Switch>
-        <Route path="/incidente">
-          <IncidenteRoute onMenuClick={onMenuClick} />
+        <Route path={menuRoutes[Menu.INCIDENTE]} component={IncidenteRoute} />
+        <Route path={menuRoutes[Menu.COMBATE]}>
+          <CombateRoute />
+        </Route>
+        <Route path={menuRoutes[Menu.CONFIGURACOES]}>
+          <ConfiguracoesRoute />
         </Route>
         <Route path="/">
-          <Redirect to="/incidente" />
+          <Redirect to={menuRoutes[Menu.INCIDENTE]} />
         </Route>
       </Switch>
     );

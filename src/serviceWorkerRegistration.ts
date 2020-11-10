@@ -98,6 +98,15 @@ function registerValidSW(swUrl: string, config?: Config) {
           }
         };
       };
+      return registration;
+    })
+    .then((registration) => {
+      registration.update();
+      // console.log('update!');
+      window.setInterval(() => {
+        console.log('checking for updates...');
+        registration.update();
+      }, 1 * 60 * 1000);
     })
     .catch((error) => {
       console.error('Error during service worker registration:', error);

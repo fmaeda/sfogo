@@ -1,8 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-
-import { MdAddAlert } from 'react-icons/md';
-import { IoIosMenu } from 'react-icons/io';
+import { $enum } from 'ts-enum-util';
 import logoImg from 'resources/img/logo_ibama.png';
 
 import Item from './Item';
@@ -10,51 +8,40 @@ import Item from './Item';
 import { Container, Footer, Logo, Spacer } from './styled';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { FaDownload } from 'react-icons/fa';
-// import { MenuItem, menuIcons, menuColors, menuPaths } from 'model/enums';
 import { BeforeInstallPromptEvent } from 'model/beforeInstallPrompt';
 import { RootState } from 'store';
+import { ThunkActionDispatch } from 'redux-thunk';
+import { versionThunks } from 'store/version';
 
-const mapStateToProps = ({
-  version: { serviceWorkerUpdated, serviceWorkerRegistration },
-}: RootState) => ({
+import iconMappings from './iconMappings';
+import { Menu, menuRoutes, menuLabels } from 'model/menu';
+import { menuActions } from 'store/menu/index';
+
+const mapStateToProps = ({ version: { serviceWorkerUpdated } }: RootState) => ({
   serviceWorkerUpdated,
-  serviceWorkerRegistration,
 });
 
-type Props = {} & RouteComponentProps & ReturnType<typeof mapStateToProps>;
+type Props = {
+  updateApp: ThunkActionDispatch<typeof versionThunks.updateApp>;
+  setMenuOpen: typeof menuActions.setMenuOpen;
+} & RouteComponentProps &
+  ReturnType<typeof mapStateToProps>;
 type State = {
   showInstallButton: boolean;
 };
 
-class Menu extends React.Component<Props, State> {
+class MenuComponent extends React.Component<Props, State> {
   state = {
     showInstallButton: false,
   };
 
   deferredPrompt: BeforeInstallPromptEvent | null = null;
 
-  handleClick = (path: string) => () => {
-    const { history } = this.props;
-    history.push(path);
-  };
-
   componentDidMount(): void {
     window.addEventListener('beforeinstallprompt', this.handleInstall);
-    window.addEventListener('DOMContentLoaded', () => {
-      let displayMode = 'browser';
-      if ((navigator as any).standalone) {
-        displayMode = 'standalone-ios';
-      }
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        displayMode = 'standalone';
-      }
-      if (displayMode === 'browser') {
-        this.setState({ showInstallButton: true });
-      }
-      console.log('displayMode', displayMode);
-    });
     window.addEventListener('appinstalled', (evt: any) => {
       console.log('installed', evt);
+      this.deferredPrompt = null;
       this.setState({ showInstallButton: false });
     });
   }
@@ -73,18 +60,15 @@ class Menu extends React.Component<Props, State> {
   };
 
   handleUpdateClick = (): void => {
-    const { serviceWorkerRegistration } = this.props;
-    const registrationWaiting = serviceWorkerRegistration?.waiting;
+    const { updateApp } = this.props;
+    updateApp();
+  };
 
-    if (registrationWaiting) {
-      registrationWaiting.postMessage({ type: 'SKIP_WAITING' });
-
-      registrationWaiting.addEventListener('statechange', (e: any) => {
-        if (e.target?.state === 'activated') {
-          window.location.reload();
-        }
-      });
-    }
+  handleMenuPress = (menuItem: Menu) => () => {
+    const { history, setMenuOpen } = this.props;
+    const menuRoute = menuRoutes[menuItem];
+    history.push(menuRoute);
+    setMenuOpen(false);
   };
 
   render() {
@@ -96,40 +80,19 @@ class Menu extends React.Component<Props, State> {
 
     return (
       <Container>
-        <Item
-          icon={MdAddAlert}
-          color="transparent"
-          active={false}
-          label="Registro de Incidentes"
-          onClick={this.handleToggle}
-        />
-        <Item
-          icon={MdAddAlert}
-          color="transparent"
-          active={false}
-          label="Teste"
-          onClick={this.handleToggle}
-        />
-        {/* <Spacer /> */}
-        {/* {Object.values(MenuItem).map((key) => (
+        {$enum(Menu).map((menuItem) => (
           <Item
-          key={key}
-          icon={menuIcons[key]}
-            color={menuColors[key]}
-            active={pathname === menuPaths[key]}
-            onClick={this.handleClick(menuPaths[key])}
-            />
-          ))} */}
-        {/* <Item
-          key={'install'}
-          icon={menuIcons[key]}
-          color={menuColors[key]}
-          active={pathname === menuPaths[key]}
-          onClick={this.handleClick(menuPaths[key])}
-        /> */}
+            key={`menu_${menuItem}`}
+            icon={iconMappings[menuItem]}
+            color="transparent"
+            active={pathname === menuRoutes[menuItem]}
+            label={menuLabels[menuItem]}
+            onClick={this.handleMenuPress(menuItem)}
+          />
+        ))}
         <Spacer />
         <Footer>
-          {showInstallButton && (
+          {showInstallButton && this.deferredPrompt && (
             <Item
               icon={FaDownload}
               color="transparent"
@@ -154,4 +117,7 @@ class Menu extends React.Component<Props, State> {
   }
 }
 
-export default connect(mapStateToProps)(withRouter(Menu));
+export default connect(mapStateToProps, {
+  updateApp: versionThunks.updateApp,
+  setMenuOpen: menuActions.setMenuOpen,
+})(withRouter(MenuComponent));
