@@ -27,13 +27,12 @@ export const ItemContainer = styled.div<ItemProps>`
   justify-content: flex-start;
   align-self: stretch;
   user-select: none;
-  /* margin: 8px 0 8px 2px; */
   padding: 8px 0;
-  /* margin: 2px 0; */
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   color: rgba(255, 255, 255, 0.5);
   border-left: 2px solid transparent;
+  cursor: pointer;
   :hover {
     color: white;
   }
@@ -42,9 +41,7 @@ export const ItemContainer = styled.div<ItemProps>`
     font-size: 24px;
   }
 
-  :hover {
-    cursor: pointer;
-  }
+  ${({ active }) => active && 'color: white'};
 `;
 export const ItemLabel = styled.div`
   display: flex;
@@ -57,22 +54,6 @@ export const ItemLabel = styled.div`
 
 export const Spacer = styled.div`
   flex: 1;
-`;
-
-export const SelectedMarker = styled.div<ItemProps>`
-  position: absolute;
-  top: 0;
-  bottom: 0px;
-  right: 0;
-  width: 2px;
-  border-radius: 10px;
-  transition: all 0.2s ease-in-out;
-  ${({ active, color }) =>
-    active &&
-    `
-      background: ${Color(color).lighten(0.1).hex()};
-      box-shadow: 0 0 4px 0px ${color};
-  `};
 `;
 
 export const Footer = styled.div`

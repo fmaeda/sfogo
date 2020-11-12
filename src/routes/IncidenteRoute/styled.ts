@@ -15,7 +15,7 @@ export const MapContainer = styled.div`
   flex: 1;
   > div {
     width: 100% !important;
-    height: 100% !important;
+    /* height: 100% !important; */
     /* border-radius: 0 0 12px 12px !important; */
     overflow: hidden !important;
     box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);

@@ -2,7 +2,6 @@ import React from 'react';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { connect } from 'react-redux';
-import { MdChevronLeft } from 'react-icons/md';
 
 import {
   Logo,
@@ -27,6 +26,7 @@ import { notificationActions } from 'store/notification';
 import { ThunkActionDispatch } from 'redux-thunk';
 import { RootState } from 'store';
 import { menuActions } from 'store/menu/index';
+import Avatar from 'components/Avatar';
 
 const history = createHashHistory({ hashType: 'hashbang' });
 
@@ -90,6 +90,7 @@ class App extends React.Component<Props> {
             <SideBar drawerOpen={mainMenuOpen}>
               {/* <MdChevronLeft onClick={this.toggleDrawer} /> */}
               <Logo src={sisfogoLogo} />
+              <Avatar />
               <Route path="/" component={Menu} />
             </SideBar>
           </MenuContainer>

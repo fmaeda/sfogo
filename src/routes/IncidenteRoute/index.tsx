@@ -5,9 +5,12 @@ import ReactMapGL, {
   WebMercatorViewport,
   PointerEvent,
   Marker,
+  DragEvent,
 } from 'react-map-gl';
 import qs from 'qs';
 import axios, { AxiosResponse } from 'axios';
+import { points } from '@turf/helpers';
+import bbox from '@turf/bbox';
 import { FaLayerGroup, FaMapMarkerAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { FiRefreshCcw } from 'react-icons/fi';
 import { easeCubic } from 'd3-ease';
@@ -32,10 +35,20 @@ import NivelAcionamentoPicker from 'components/NivelAcionamentoPicker';
 import { NivelAcionamento } from 'model/nivelAcionamento';
 import { MdMyLocation } from 'react-icons/md';
 import AppBar from 'components/AppBar';
+import GeometryTypePicker from 'components/GeometryTypePicker';
+import { GeometryType } from 'model/geometryType';
+
+const DEAFULT_MARKERS = [
+  { latitude: -15.839131300049361, longitude: -48.0194073719668 },
+  { latitude: -15.839131300049361, longitude: -48.01719723173883 },
+  { latitude: -15.837830789183949, longitude: -48.01816282698419 },
+  { latitude: -15.83968865928514, longitude: -48.01824865767236 },
+];
 
 enum EditMode {
   NONE,
-  SET_MARKER,
+  MARKER_TYPE,
+  DRAW,
   INPUT_DETAILS,
 }
 
@@ -60,8 +73,9 @@ type State = {
     municipio: string;
     descricao: string;
   };
-  markerLatLon?: LatLon;
+  markers: LatLon[];
   nivelAcionamento?: NivelAcionamento;
+  geometryType?: GeometryType;
 };
 
 const getAddressDescription = (address: AddressDetails): string => {
@@ -84,6 +98,7 @@ class IncidenteRoute extends React.Component<Props, State> {
       bearing: 0,
       pitch: 0,
     },
+    markers: [],
     bottomDrawerOpen: false,
     editMode: EditMode.NONE,
   };
@@ -155,6 +170,47 @@ class IncidenteRoute extends React.Component<Props, State> {
     });
   };
 
+  flyToPreviewBbox = (): void => {
+    const { markers } = this.state;
+    if (markers.length === 1) {
+      this.flyToPreview(markers[0]);
+    } else {
+      const multiPoint = points(
+        markers.map(({ longitude, latitude }) => [longitude, latitude]),
+      );
+      const boundingBox = bbox(multiPoint);
+      const { longitude, latitude, zoom } = new WebMercatorViewport(
+        this.state.viewport,
+      ).fitBounds(
+        [
+          [boundingBox[0], boundingBox[1]],
+          [boundingBox[2], boundingBox[3]],
+        ],
+        {
+          padding: {
+            top: 100,
+            right: 50,
+            bottom: 300,
+            left: 50,
+          },
+          // offset: [-10, 0],
+        },
+      );
+      const { viewport } = this.state;
+      this.setState({
+        viewport: {
+          ...viewport,
+          longitude,
+          latitude,
+          zoom,
+          transitionDuration: 2000,
+          transitionInterpolator: new FlyToInterpolator(),
+          transitionEasing: easeCubic,
+        },
+      });
+    }
+  };
+
   flyTo = (lat: number, lon: number): void => {
     const { viewport } = this.state;
     this.setState({
@@ -173,10 +229,8 @@ class IncidenteRoute extends React.Component<Props, State> {
   fitBounds = (bbox: [[number, number], [number, number]]): void => {
     const { longitude, latitude, zoom } = new WebMercatorViewport(
       this.state.viewport,
-    ).fitBounds(bbox, {
-      // padding: 20,
-      // offset: [0, -100],
-    });
+    ).fitBounds(bbox);
+
     const { viewport } = this.state;
     this.setState({
       viewport: {
@@ -230,29 +284,36 @@ class IncidenteRoute extends React.Component<Props, State> {
   handleMapClick = async (evt: PointerEvent): Promise<void> => {
     // console.log('click', evt);
     const { editMode } = this.state;
-    if (editMode === EditMode.SET_MARKER) {
+    if (editMode === EditMode.DRAW) {
       const [longitude, latitude] = evt.lngLat;
+      console.log('lat/lon', {
+        latitude,
+        longitude,
+      });
       // const result = await this.fetchDetails(latitude, longitude);
       // console.log('result', result);
-      this.setState({
-        markerLatLon: { latitude, longitude },
-      });
+      this.setState(({ markers, ...state }) => ({
+        ...state,
+        markers: [...markers, { latitude, longitude }],
+      }));
     }
   };
 
   handleCancel = (): void => {
     this.setState({
-      markerLatLon: undefined,
+      markers: [],
+      geometryType: undefined,
       editMode: EditMode.NONE,
     });
   };
 
   handleConfirm = async (): Promise<void> => {
-    const { markerLatLon } = this.state;
-    if (markerLatLon) {
+    const { markers } = this.state;
+    if (markers.length >= 1) {
+      const marker = markers[0];
       const address = await this.fetchDetails(
-        markerLatLon.latitude,
-        markerLatLon.longitude,
+        marker.latitude,
+        marker.longitude,
       );
 
       this.setState(
@@ -266,19 +327,21 @@ class IncidenteRoute extends React.Component<Props, State> {
           },
         },
         () => {
-          this.flyToPreview(markerLatLon);
+          // this.flyToPreview(marker);
+          this.flyToPreviewBbox();
         },
       );
     }
   };
 
   renderFabArea = (): JSX.Element => {
-    const { editMode: drawMode, markerLatLon } = this.state;
+    const { editMode: drawMode, markers } = this.state;
+    const hasMarkers = markers.length > 0;
     switch (drawMode) {
-      case EditMode.SET_MARKER: {
+      case EditMode.DRAW: {
         return (
           <>
-            {markerLatLon ? (
+            {hasMarkers ? (
               <HintContainer>Confirme a operação</HintContainer>
             ) : (
               <HintContainer>Indique o local do incidente</HintContainer>
@@ -287,7 +350,7 @@ class IncidenteRoute extends React.Component<Props, State> {
               <FAB onClick={this.handleCancel}>
                 <FaTimes color="tomato" size={24} />
               </FAB>
-              {markerLatLon && (
+              {hasMarkers && (
                 <FAB onClick={this.handleConfirm}>
                   <FaCheck color="lime" size={24} />
                 </FAB>
@@ -299,11 +362,86 @@ class IncidenteRoute extends React.Component<Props, State> {
       case EditMode.NONE:
       default: {
         return (
-          <FAB onClick={() => this.setState({ editMode: EditMode.SET_MARKER })}>
+          <FAB
+            onClick={() =>
+              this.setState({
+                editMode: EditMode.MARKER_TYPE,
+                bottomDrawerOpen: true,
+              })
+            }
+          >
             <FireIcon />
           </FAB>
         );
       }
+    }
+  };
+
+  handleGeometryType = (geometryType: GeometryType): void => {
+    this.setState({
+      geometryType,
+      editMode: EditMode.DRAW,
+      bottomDrawerOpen: false,
+    });
+  };
+
+  renderDrawerContent = (): JSX.Element | null => {
+    const {
+      currentAddress,
+      nivelAcionamento,
+      editMode,
+      geometryType,
+    } = this.state;
+    switch (editMode) {
+      case EditMode.INPUT_DETAILS: {
+        return (
+          <DrawerContent>
+            {currentAddress && (
+              <Address
+                uf={currentAddress.uf}
+                municipio={currentAddress.municipio}
+                descricao={currentAddress.descricao}
+              />
+            )}
+            <h3>Qual o Nível de Acionamento?</h3>
+            <NivelAcionamentoPicker
+              onSelect={this.handleNivelAcionamento}
+              selected={nivelAcionamento}
+            />
+            {nivelAcionamento && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  marginBottom: 12,
+                }}
+              >
+                <FiRefreshCcw size={40} onClick={this.reset} />
+                <span style={{ textAlign: 'center', marginTop: 8 }}>
+                  Reiniciar fluxo <br /> (falta implementar próximas telas)
+                </span>
+              </div>
+            )}
+          </DrawerContent>
+        );
+      }
+      case EditMode.MARKER_TYPE: {
+        return (
+          <DrawerContent>
+            <h3>Qual o tipo da área do Incidente?</h3>
+            <GeometryTypePicker
+              onSelect={this.handleGeometryType}
+              selected={geometryType}
+              items={[GeometryType.POINT, GeometryType.POLYGON]}
+            />
+          </DrawerContent>
+        );
+      }
+      default:
+        return null;
     }
   };
 
@@ -315,26 +453,42 @@ class IncidenteRoute extends React.Component<Props, State> {
     this.setState({ nivelAcionamento });
   };
 
+  handleMarkerDragEnd = (idx: number) => (evt: DragEvent): void => {
+    // console.log('evt', evt);
+    const [longitude, latitude] = evt.lngLat;
+    this.setState(({ markers, ...state }) => ({
+      ...state,
+      markers: markers.map((m, currIdx) =>
+        idx === currIdx ? { longitude, latitude } : m,
+      ),
+    }));
+    // this.setState({
+    //   markerLatLon: {
+    //     longitude,
+    //     latitude,
+    //   },
+    // });
+  };
+
+  handleMarkerClick = (idx: number) => (
+    evt: React.MouseEvent<HTMLDivElement>,
+  ): void => {
+    console.log('idx', idx, evt);
+  };
+
   reset = (): void => {
     this.setState({
       nivelAcionamento: undefined,
-      markerLatLon: undefined,
+      geometryType: undefined,
       currentAddress: undefined,
       bottomDrawerOpen: false,
       editMode: EditMode.NONE,
+      markers: [],
     });
   };
 
   render(): JSX.Element {
-    const {
-      viewport,
-      editMode,
-      markerLatLon,
-      bottomDrawerOpen,
-      currentAddress,
-      nivelAcionamento,
-    } = this.state;
-    // console.log('markerLatLon', markerLatLon);
+    const { viewport, editMode, bottomDrawerOpen, markers } = this.state;
 
     return (
       <Content>
@@ -376,16 +530,18 @@ class IncidenteRoute extends React.Component<Props, State> {
               ],
             }}
           >
-            {markerLatLon && (
+            {markers.map((marker, idx) => (
               <Marker
-                {...markerLatLon}
-                draggable={editMode === EditMode.SET_MARKER}
+                {...marker}
+                key={`marker_${idx}`}
+                draggable={editMode === EditMode.DRAW}
+                onDragEnd={this.handleMarkerDragEnd(idx)}
               >
-                <MarkerContainer onClick={() => console.log('marker click')}>
+                <MarkerContainer onClick={this.handleMarkerClick(idx)}>
                   <FaMapMarkerAlt />
                 </MarkerContainer>
               </Marker>
-            )}
+            ))}
           </ReactMapGL>
         </MapContainer>
         <ActionButtons>
@@ -397,37 +553,7 @@ class IncidenteRoute extends React.Component<Props, State> {
           isVisible={bottomDrawerOpen}
           onClose={this.handleBottomDrawerClose}
         >
-          <DrawerContent>
-            {currentAddress && (
-              <Address
-                uf={currentAddress.uf}
-                municipio={currentAddress.municipio}
-                descricao={currentAddress.descricao}
-              />
-            )}
-            <h3>Qual o Nível de Acionamento?</h3>
-            <NivelAcionamentoPicker
-              onSelect={this.handleNivelAcionamento}
-              selected={nivelAcionamento}
-            />
-            {nivelAcionamento && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flex: 1,
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  marginBottom: 12,
-                }}
-              >
-                <FiRefreshCcw size={40} onClick={this.reset} />
-                <span style={{ textAlign: 'center', marginTop: 8 }}>
-                  Reiniciar fluxo <br /> (falta implementar próximas telas)
-                </span>
-              </div>
-            )}
-          </DrawerContent>
+          {this.renderDrawerContent()}
         </BottomDrawer>
       </Content>
     );

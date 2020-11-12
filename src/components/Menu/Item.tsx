@@ -1,5 +1,5 @@
 import React from 'react';
-import { ItemContainer, SelectedMarker, ItemLabel } from './styled';
+import { ItemContainer, ItemLabel } from './styled';
 
 type Props = {
   icon: React.ComponentType;
@@ -16,7 +16,6 @@ class Item extends React.Component<Props> {
     return (
       <ItemContainer active={!!active} onClick={onClick} color={color}>
         <Icon />
-        <SelectedMarker color={color} active={active} />
         <ItemLabel>{label}</ItemLabel>
       </ItemContainer>
     );

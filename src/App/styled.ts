@@ -97,6 +97,7 @@ export const SideBar = styled.div<DrawerProps>`
 `;
 
 export const Logo = styled.img`
+  margin: 28px 0;
   height: 28px;
 `;
 

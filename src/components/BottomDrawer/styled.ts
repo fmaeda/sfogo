@@ -15,5 +15,5 @@ export const Container = styled.span`
 export const Content = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 50vh;
+  min-height: 20vh;
 `;
