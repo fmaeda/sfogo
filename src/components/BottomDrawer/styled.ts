@@ -16,4 +16,5 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 20vh;
+  margin-bottom: 20px;
 `;

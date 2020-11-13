@@ -77,6 +77,14 @@ class App extends React.Component<Props> {
         });
       },
     });
+    document.addEventListener('visibilitychange', () => {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (document.visibilityState === 'visible') {
+          console.log('checking for updates...');
+          reg?.update();
+        }
+      });
+    });
   }
 
   render(): JSX.Element {

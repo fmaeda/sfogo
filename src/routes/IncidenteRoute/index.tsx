@@ -7,10 +7,24 @@ import ReactMapGL, {
   Marker,
   DragEvent,
 } from 'react-map-gl';
+import {
+  Editor,
+  DrawPolygonMode,
+  EditingMode,
+  RENDER_STATE,
+} from 'react-map-gl-draw';
 import qs from 'qs';
 import axios, { AxiosResponse } from 'axios';
-import { points } from '@turf/helpers';
+import {
+  point,
+  featureCollection,
+  geometryCollection,
+  AllGeoJSON,
+} from '@turf/helpers';
 import bbox from '@turf/bbox';
+import union from '@turf/union';
+import centerOfMass from '@turf/center-of-mass';
+import centroid from '@turf/centroid';
 import { FaLayerGroup, FaMapMarkerAlt, FaTimes, FaCheck } from 'react-icons/fa';
 import { FiRefreshCcw } from 'react-icons/fi';
 import { easeCubic } from 'd3-ease';
@@ -37,19 +51,24 @@ import { MdMyLocation } from 'react-icons/md';
 import AppBar from 'components/AppBar';
 import GeometryTypePicker from 'components/GeometryTypePicker';
 import { GeometryType } from 'model/geometryType';
+import { BBox, Feature, Point } from 'geojson';
+import { Feature as NebulaFeature } from 'typings/nebula.gl';
 
-const DEAFULT_MARKERS = [
-  { latitude: -15.839131300049361, longitude: -48.0194073719668 },
-  { latitude: -15.839131300049361, longitude: -48.01719723173883 },
-  { latitude: -15.837830789183949, longitude: -48.01816282698419 },
-  { latitude: -15.83968865928514, longitude: -48.01824865767236 },
-];
+const EDITING_MODE = new EditingMode();
+const DRAW_POLYGON_MODE = new DrawPolygonMode();
+
+enum EditType {
+  ADD_TENTATIVE_POSITION = 'addTentativePosition',
+  ADD_FEATURE = 'addFeature',
+  MOVE_POSITION = 'movePosition',
+}
 
 enum EditMode {
-  NONE,
-  MARKER_TYPE,
-  DRAW,
-  INPUT_DETAILS,
+  NONE = 'NONE',
+  MARKER_TYPE = 'MARKER_TYPE',
+  DRAW = 'DRAW',
+  EDIT = 'EDIT',
+  INPUT_DETAILS = 'INPUT_DETAILS',
 }
 
 type LatLon = {
@@ -73,7 +92,8 @@ type State = {
     municipio: string;
     descricao: string;
   };
-  markers: LatLon[];
+  locations: Feature[];
+  selectedFeatureIndex?: number;
   nivelAcionamento?: NivelAcionamento;
   geometryType?: GeometryType;
 };
@@ -98,12 +118,13 @@ class IncidenteRoute extends React.Component<Props, State> {
       bearing: 0,
       pitch: 0,
     },
-    markers: [],
+    locations: [],
     bottomDrawerOpen: false,
     editMode: EditMode.NONE,
   };
 
   mapRef = React.createRef<ReactMapGL>();
+  editorRef = React.createRef<Editor>();
 
   async componentDidMount(): Promise<void> {
     const {
@@ -170,45 +191,37 @@ class IncidenteRoute extends React.Component<Props, State> {
     });
   };
 
-  flyToPreviewBbox = (): void => {
-    const { markers } = this.state;
-    if (markers.length === 1) {
-      this.flyToPreview(markers[0]);
-    } else {
-      const multiPoint = points(
-        markers.map(({ longitude, latitude }) => [longitude, latitude]),
-      );
-      const boundingBox = bbox(multiPoint);
-      const { longitude, latitude, zoom } = new WebMercatorViewport(
-        this.state.viewport,
-      ).fitBounds(
-        [
-          [boundingBox[0], boundingBox[1]],
-          [boundingBox[2], boundingBox[3]],
-        ],
-        {
-          padding: {
-            top: 100,
-            right: 50,
-            bottom: 300,
-            left: 50,
-          },
-          // offset: [-10, 0],
+  flyToPreviewBbox = (boundingBox: BBox): void => {
+    const { viewport } = this.state;
+    console.log('bbox', boundingBox);
+    const { longitude, latitude, zoom } = new WebMercatorViewport(
+      viewport,
+    ).fitBounds(
+      [
+        [boundingBox[0], boundingBox[1]],
+        [boundingBox[2], boundingBox[3]],
+      ],
+      {
+        padding: {
+          top: 100,
+          right: 50,
+          bottom: 300,
+          left: 50,
         },
-      );
-      const { viewport } = this.state;
-      this.setState({
-        viewport: {
-          ...viewport,
-          longitude,
-          latitude,
-          zoom,
-          transitionDuration: 2000,
-          transitionInterpolator: new FlyToInterpolator(),
-          transitionEasing: easeCubic,
-        },
-      });
-    }
+      },
+    );
+
+    this.setState({
+      viewport: {
+        ...viewport,
+        longitude,
+        latitude,
+        zoom,
+        transitionDuration: 2000,
+        transitionInterpolator: new FlyToInterpolator(),
+        transitionEasing: easeCubic,
+      },
+    });
   };
 
   flyTo = (lat: number, lon: number): void => {
@@ -245,10 +258,10 @@ class IncidenteRoute extends React.Component<Props, State> {
     });
   };
 
-  fetchDetails = async (lat: number, lon: number): Promise<AddressDetails> => {
+  fetchDetails = async (lon: number, lat: number): Promise<AddressDetails> => {
     const query = qs.stringify({
-      lat,
       lon,
+      lat,
       polygon_geojson: 0,
       'accept-language': 'pt-BR',
       countrycodes: 'br',
@@ -283,65 +296,73 @@ class IncidenteRoute extends React.Component<Props, State> {
 
   handleMapClick = async (evt: PointerEvent): Promise<void> => {
     // console.log('click', evt);
-    const { editMode } = this.state;
-    if (editMode === EditMode.DRAW) {
+    const { editMode, geometryType } = this.state;
+    if (editMode === EditMode.DRAW && geometryType === GeometryType.POINT) {
       const [longitude, latitude] = evt.lngLat;
-      console.log('lat/lon', {
-        latitude,
-        longitude,
-      });
+      const marker = point([longitude, latitude]);
+
+      this.setState(({ locations: polygons, ...state }) => ({
+        ...state,
+        locations: [...polygons, marker as Feature],
+      }));
+      // console.log('lat/lon', {
+      //   latitude,
+      //   longitude,
+      // });
+
       // const result = await this.fetchDetails(latitude, longitude);
       // console.log('result', result);
-      this.setState(({ markers, ...state }) => ({
-        ...state,
-        markers: [...markers, { latitude, longitude }],
-      }));
+      // this.setState(({ markers, ...state }) => ({
+      //   ...state,
+      //   markers: [...markers, { latitude, longitude }],
+      // }));
+    } else {
+      console.log('mapClick', evt);
     }
   };
 
   handleCancel = (): void => {
     this.setState({
-      markers: [],
+      locations: [],
       geometryType: undefined,
       editMode: EditMode.NONE,
     });
   };
 
   handleConfirm = async (): Promise<void> => {
-    const { markers } = this.state;
-    if (markers.length >= 1) {
-      const marker = markers[0];
-      const address = await this.fetchDetails(
-        marker.latitude,
-        marker.longitude,
-      );
+    const { locations } = this.state;
+    // console.log('locations', locations);
+    const collection = featureCollection(locations);
+    // console.log('collection', collection);
+    const point: Feature<Point> = centroid(collection as AllGeoJSON);
+    // console.log('center', point);
+    const [longitude, latitude] = point.geometry.coordinates;
+    const address = await this.fetchDetails(longitude, latitude);
 
-      this.setState(
-        {
-          editMode: EditMode.INPUT_DETAILS,
-          bottomDrawerOpen: true,
-          currentAddress: {
-            uf: address.state,
-            municipio: getCity(address),
-            descricao: getAddressDescription(address),
-          },
+    this.setState(
+      {
+        editMode: EditMode.INPUT_DETAILS,
+        bottomDrawerOpen: true,
+        currentAddress: {
+          uf: address.state,
+          municipio: getCity(address),
+          descricao: getAddressDescription(address),
         },
-        () => {
-          // this.flyToPreview(marker);
-          this.flyToPreviewBbox();
-        },
-      );
-    }
+      },
+      () => {
+        this.flyToPreviewBbox(bbox(collection));
+      },
+    );
   };
 
   renderFabArea = (): JSX.Element => {
-    const { editMode: drawMode, markers } = this.state;
-    const hasMarkers = markers.length > 0;
+    const { editMode: drawMode, locations } = this.state;
+    const hasLocations = locations.length > 0;
     switch (drawMode) {
       case EditMode.DRAW: {
         return (
           <>
-            {hasMarkers ? (
+            {hasLocations ? (
               <HintContainer>Confirme a operação</HintContainer>
             ) : (
               <HintContainer>Indique o local do incidente</HintContainer>
@@ -350,7 +371,7 @@ class IncidenteRoute extends React.Component<Props, State> {
               <FAB onClick={this.handleCancel}>
                 <FaTimes color="tomato" size={24} />
               </FAB>
-              {hasMarkers && (
+              {hasLocations && (
                 <FAB onClick={this.handleConfirm}>
                   <FaCheck color="lime" size={24} />
                 </FAB>
@@ -456,18 +477,56 @@ class IncidenteRoute extends React.Component<Props, State> {
   handleMarkerDragEnd = (idx: number) => (evt: DragEvent): void => {
     // console.log('evt', evt);
     const [longitude, latitude] = evt.lngLat;
-    this.setState(({ markers, ...state }) => ({
+    this.setState(({ locations, ...state }) => ({
       ...state,
-      markers: markers.map((m, currIdx) =>
-        idx === currIdx ? { longitude, latitude } : m,
+      locations: locations.map((p, currIdx) =>
+        idx === currIdx ? point([longitude, latitude]) : p,
       ),
     }));
-    // this.setState({
-    //   markerLatLon: {
-    //     longitude,
-    //     latitude,
-    //   },
-    // });
+  };
+
+  handlePolygonSelect = ({
+    selectedFeature,
+    selectedFeatureIndex,
+  }: {
+    mapCoords: [number, number];
+    screenCords: [number, number];
+    selectedEditHandleIndex?: number;
+    selectedFeature?: Feature;
+    selectedFeatureIndex?: number;
+  }): void => {
+    const { selectedFeatureIndex: currentSelectionIndex } = this.state;
+    if (
+      selectedFeatureIndex !== currentSelectionIndex &&
+      selectedFeature?.geometry.type === 'Polygon'
+    ) {
+      this.setState({ editMode: EditMode.EDIT, selectedFeatureIndex });
+    }
+
+    if (currentSelectionIndex !== undefined && selectedFeature === null) {
+      this.setState({
+        editMode: EditMode.DRAW,
+        selectedFeatureIndex: undefined,
+      });
+    }
+  };
+
+  handlePolygonUpdate = ({
+    data,
+    editType,
+  }: {
+    data: Feature[];
+    editType: string;
+    editContext: any;
+  }): void => {
+    switch (editType) {
+      case EditType.MOVE_POSITION:
+      case EditType.ADD_FEATURE: {
+        this.setState({
+          locations: data,
+        });
+      }
+    }
   };
 
   handleMarkerClick = (idx: number) => (
@@ -476,20 +535,57 @@ class IncidenteRoute extends React.Component<Props, State> {
     console.log('idx', idx, evt);
   };
 
+  handleFeatureStyle = ({
+    feature,
+    state,
+  }: {
+    feature: Feature;
+    state: RENDER_STATE;
+  }): any => {
+    switch (state) {
+      case RENDER_STATE.UNCOMMITTED: {
+        return {
+          stroke: 'black',
+          fill: 'red',
+        };
+      }
+      case RENDER_STATE.HOVERED: {
+        return {
+          stroke: 'cyan',
+          fill: 'lime',
+        };
+      }
+      default: {
+        return {
+          stroke: 'blue',
+          fill: 'yellow',
+        };
+      }
+    }
+  };
+
   reset = (): void => {
     this.setState({
       nivelAcionamento: undefined,
       geometryType: undefined,
       currentAddress: undefined,
+      selectedFeatureIndex: undefined,
       bottomDrawerOpen: false,
       editMode: EditMode.NONE,
-      markers: [],
+      locations: [],
     });
   };
 
   render(): JSX.Element {
-    const { viewport, editMode, bottomDrawerOpen, markers } = this.state;
-
+    const {
+      viewport,
+      editMode,
+      bottomDrawerOpen,
+      geometryType,
+      locations: polygons,
+      selectedFeatureIndex,
+    } = this.state;
+    // console.log('polygons', polygons);
     return (
       <Content>
         <AppBar title="Registro de Incidente" />
@@ -501,10 +597,11 @@ class IncidenteRoute extends React.Component<Props, State> {
         )}
         <MapContainer>
           <ReactMapGL
-            width="100%"
-            height={bottomDrawerOpen ? '50%' : '"100%"'}
-            ref={this.mapRef}
             {...viewport}
+            width="100%"
+            height="100%"
+            // height={bottomDrawerOpen ? '50%' : '"100%"'}
+            ref={this.mapRef}
             onViewportChange={this.handleViewportChange}
             onClick={this.handleMapClick}
             mapStyle={{
@@ -530,18 +627,43 @@ class IncidenteRoute extends React.Component<Props, State> {
               ],
             }}
           >
-            {markers.map((marker, idx) => (
-              <Marker
-                {...marker}
-                key={`marker_${idx}`}
-                draggable={editMode === EditMode.DRAW}
-                onDragEnd={this.handleMarkerDragEnd(idx)}
-              >
-                <MarkerContainer onClick={this.handleMarkerClick(idx)}>
-                  <FaMapMarkerAlt />
-                </MarkerContainer>
-              </Marker>
-            ))}
+            {polygons
+              .filter((p) => p.geometry.type === 'Point')
+              .map((p) => p.geometry as Point)
+              .map((marker, idx) => (
+                <Marker
+                  longitude={marker.coordinates[0]}
+                  latitude={marker.coordinates[1]}
+                  key={`marker_${idx}`}
+                  draggable={editMode === EditMode.DRAW}
+                  onDragEnd={this.handleMarkerDragEnd(idx)}
+                >
+                  <MarkerContainer onClick={this.handleMarkerClick(idx)}>
+                    <FaMapMarkerAlt />
+                  </MarkerContainer>
+                </Marker>
+              ))}
+            {geometryType === GeometryType.POLYGON && (
+              <Editor
+                ref={this.editorRef}
+                clickRadius={12}
+                key="fixed"
+                selectable
+                mode={
+                  editMode === EditMode.DRAW
+                    ? DRAW_POLYGON_MODE
+                    : editMode === EditMode.EDIT
+                    ? EDITING_MODE
+                    : undefined
+                }
+                featureStyle={this.handleFeatureStyle}
+                featuresDraggable
+                selectedFeatureIndex={selectedFeatureIndex}
+                features={polygons as NebulaFeature[]}
+                onSelect={this.handlePolygonSelect}
+                onUpdate={this.handlePolygonUpdate}
+              />
+            )}
           </ReactMapGL>
         </MapContainer>
         <ActionButtons>
