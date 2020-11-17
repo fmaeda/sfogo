@@ -10,7 +10,7 @@ import { GiBrazil } from 'react-icons/gi';
 
 import IconPicker from 'components/IconPicker';
 
-import { Container } from './styled';
+import DrawerCard from 'components/BottomDrawer/DrawerCard';
 
 const iconMappings: { [key in NivelAcionamento]: React.ComponentType } = {
   [NivelAcionamento.MUNICIPAL]: FaCity,
@@ -39,7 +39,7 @@ class NivelAcionamentoPicker extends React.Component<Props> {
     const { selected } = this.props;
 
     return (
-      <Container>
+      <DrawerCard title="Qual o Nível de Acionamento?">
         {$enum(NivelAcionamento).map((nivel) => (
           <IconPicker
             key={`item_${nivel}`}
@@ -50,7 +50,7 @@ class NivelAcionamentoPicker extends React.Component<Props> {
             selected={nivel === selected}
           />
         ))}
-      </Container>
+      </DrawerCard>
     );
   }
 }

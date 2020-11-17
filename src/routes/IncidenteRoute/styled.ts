@@ -40,7 +40,7 @@ export const FabContainer = styled.span`
 export const ActionButtons = styled.span`
   position: absolute;
   right: 12px;
-  bottom: 30%;
+  top: 18%;
   display: flex;
   flex-direction: column;
   /* border: solid red; */
@@ -105,10 +105,4 @@ export const DrawerContent = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-
-  > h3 {
-    text-align: center;
-    font-weight: 200;
-    font-size: 24px;
-  }
 `;

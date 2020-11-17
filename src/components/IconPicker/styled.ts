@@ -10,7 +10,6 @@ export const Container = styled.div<ItemProps>`
   justify-content: center;
   padding: 12px;
   border-radius: 8px;
-  border: solid silver 1px;
   margin: 8px;
   width: 64px;
   cursor: pointer;
@@ -20,12 +19,15 @@ export const Container = styled.div<ItemProps>`
   }
 
   transition: all 0.2s ease-in-out;
+  /* border: solid silver 1px; */
+  box-shadow: 2px 2px 12px -4px rgba(0, 0, 0, 0.3);
 
   ${({ selected }) =>
     selected &&
     `
-    background: gray;
-    color: whitesmoke;
+    background: whitesmoke;
+    color: #454C5D;
+    box-shadow: inset 2px 2px 8px -4px rgba(0, 0, 0, 0.3);
     > span {
       color: whitesmoke;
       font-weight: 600;

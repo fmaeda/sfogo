@@ -45,17 +45,14 @@ import {
 } from './styled';
 import SearchBox, { Result } from 'components/SearchBox';
 import Address from 'components/Address';
-import NivelAcionamentoPicker from 'components/NivelAcionamentoPicker';
-import { NivelAcionamento } from 'model/nivelAcionamento';
 import { MdMyLocation } from 'react-icons/md';
 import AppBar from 'components/AppBar';
 import GeometryTypePicker from 'components/GeometryTypePicker';
 import { GeometryType } from 'model/geometryType';
 import { BBox, Feature, Point } from 'geojson';
 import { Feature as NebulaFeature } from 'typings/nebula.gl';
-
-const EDITING_MODE = new EditingMode();
-const DRAW_POLYGON_MODE = new DrawPolygonMode();
+import Form from './Form';
+import DrawerCard from 'components/BottomDrawer/DrawerCard';
 
 enum EditType {
   ADD_TENTATIVE_POSITION = 'addTentativePosition',
@@ -70,11 +67,6 @@ enum EditMode {
   EDIT = 'EDIT',
   INPUT_DETAILS = 'INPUT_DETAILS',
 }
-
-type LatLon = {
-  latitude: number;
-  longitude: number;
-};
 
 type AddressDetails = {
   state: string;
@@ -94,7 +86,6 @@ type State = {
   };
   locations: Feature[];
   selectedFeatureIndex?: number;
-  nivelAcionamento?: NivelAcionamento;
   geometryType?: GeometryType;
 };
 
@@ -122,6 +113,9 @@ class IncidenteRoute extends React.Component<Props, State> {
     bottomDrawerOpen: false,
     editMode: EditMode.NONE,
   };
+
+  editingMode = new EditingMode();
+  drawPolygonMode = new DrawPolygonMode();
 
   mapRef = React.createRef<ReactMapGL>();
   editorRef = React.createRef<Editor>();
@@ -160,10 +154,14 @@ class IncidenteRoute extends React.Component<Props, State> {
     const {
       coords: { latitude, longitude },
     } = await this.getCurrentLocation();
-    this.flyTo(latitude, longitude);
+    this.flyTo(longitude, latitude);
   };
 
-  flyToPreview = ({ latitude, longitude }: LatLon): void => {
+  flyToPreview = ({
+    geometry: {
+      coordinates: [longitude, latitude],
+    },
+  }: Feature<Point>): void => {
     const container = this.mapRef.current?.getMap().getContainer();
     const width = container?.clientWidth ?? 1;
     const height = container?.clientHeight ?? 1;
@@ -191,7 +189,10 @@ class IncidenteRoute extends React.Component<Props, State> {
     });
   };
 
-  flyToPreviewBbox = (boundingBox: BBox): void => {
+  flyToPreviewBbox = (
+    boundingBox: BBox,
+    featureCentroid: Feature<Point>,
+  ): void => {
     const { viewport } = this.state;
     console.log('bbox', boundingBox);
     const { longitude, latitude, zoom } = new WebMercatorViewport(
@@ -211,26 +212,30 @@ class IncidenteRoute extends React.Component<Props, State> {
       },
     );
 
+    if (zoom <= 18) {
+      this.setState({
+        viewport: {
+          ...viewport,
+          longitude,
+          latitude,
+          zoom,
+          transitionDuration: 2000,
+          transitionInterpolator: new FlyToInterpolator(),
+          transitionEasing: easeCubic,
+        },
+      });
+    } else {
+      this.flyToPreview(featureCentroid);
+    }
+  };
+
+  flyTo = (longitude: number, latitude: number): void => {
+    const { viewport } = this.state;
     this.setState({
       viewport: {
         ...viewport,
         longitude,
         latitude,
-        zoom,
-        transitionDuration: 2000,
-        transitionInterpolator: new FlyToInterpolator(),
-        transitionEasing: easeCubic,
-      },
-    });
-  };
-
-  flyTo = (lat: number, lon: number): void => {
-    const { viewport } = this.state;
-    this.setState({
-      viewport: {
-        ...viewport,
-        longitude: lon,
-        latitude: lat,
         zoom: 15,
         transitionDuration: 2000,
         transitionInterpolator: new FlyToInterpolator(),
@@ -285,7 +290,6 @@ class IncidenteRoute extends React.Component<Props, State> {
   };
 
   handleResultSelect = (result: Result): void => {
-    // this.flyTo(result.lat, result.lon);
     console.log('result', result.boundingbox);
     const [x, y, min, max] = result.boundingbox.map(Number);
     this.fitBounds([
@@ -305,17 +309,6 @@ class IncidenteRoute extends React.Component<Props, State> {
         ...state,
         locations: [...polygons, marker as Feature],
       }));
-      // console.log('lat/lon', {
-      //   latitude,
-      //   longitude,
-      // });
-
-      // const result = await this.fetchDetails(latitude, longitude);
-      // console.log('result', result);
-      // this.setState(({ markers, ...state }) => ({
-      //   ...state,
-      //   markers: [...markers, { latitude, longitude }],
-      // }));
     } else {
       console.log('mapClick', evt);
     }
@@ -327,6 +320,8 @@ class IncidenteRoute extends React.Component<Props, State> {
       geometryType: undefined,
       editMode: EditMode.NONE,
     });
+    this.editingMode = new EditingMode();
+    this.drawPolygonMode = new DrawPolygonMode();
   };
 
   handleConfirm = async (): Promise<void> => {
@@ -350,7 +345,7 @@ class IncidenteRoute extends React.Component<Props, State> {
         },
       },
       () => {
-        this.flyToPreviewBbox(bbox(collection));
+        this.flyToPreviewBbox(bbox(collection), point);
       },
     );
   };
@@ -359,7 +354,8 @@ class IncidenteRoute extends React.Component<Props, State> {
     const { editMode: drawMode, locations } = this.state;
     const hasLocations = locations.length > 0;
     switch (drawMode) {
-      case EditMode.DRAW: {
+      case EditMode.DRAW:
+      case EditMode.EDIT: {
         return (
           <>
             {hasLocations ? (
@@ -407,12 +403,7 @@ class IncidenteRoute extends React.Component<Props, State> {
   };
 
   renderDrawerContent = (): JSX.Element | null => {
-    const {
-      currentAddress,
-      nivelAcionamento,
-      editMode,
-      geometryType,
-    } = this.state;
+    const { currentAddress, editMode, geometryType } = this.state;
     switch (editMode) {
       case EditMode.INPUT_DETAILS: {
         return (
@@ -424,40 +415,20 @@ class IncidenteRoute extends React.Component<Props, State> {
                 descricao={currentAddress.descricao}
               />
             )}
-            <h3>Qual o Nível de Acionamento?</h3>
-            <NivelAcionamentoPicker
-              onSelect={this.handleNivelAcionamento}
-              selected={nivelAcionamento}
-            />
-            {nivelAcionamento && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  flex: 1,
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  marginBottom: 12,
-                }}
-              >
-                <FiRefreshCcw size={40} onClick={this.reset} />
-                <span style={{ textAlign: 'center', marginTop: 8 }}>
-                  Reiniciar fluxo <br /> (falta implementar próximas telas)
-                </span>
-              </div>
-            )}
+            <Form />
           </DrawerContent>
         );
       }
       case EditMode.MARKER_TYPE: {
         return (
           <DrawerContent>
-            <h3>Qual o tipo da área do Incidente?</h3>
-            <GeometryTypePicker
-              onSelect={this.handleGeometryType}
-              selected={geometryType}
-              items={[GeometryType.POINT, GeometryType.POLYGON]}
-            />
+            <DrawerCard title="Qual o tipo da área do Incidente?">
+              <GeometryTypePicker
+                onSelect={this.handleGeometryType}
+                selected={geometryType}
+                items={[GeometryType.POINT, GeometryType.POLYGON]}
+              />
+            </DrawerCard>
           </DrawerContent>
         );
       }
@@ -468,10 +439,6 @@ class IncidenteRoute extends React.Component<Props, State> {
 
   handleBottomDrawerClose = (): void => {
     // this.setState({ bottomDrawerOpen: false });
-  };
-
-  handleNivelAcionamento = (nivelAcionamento: NivelAcionamento): void => {
-    this.setState({ nivelAcionamento });
   };
 
   handleMarkerDragEnd = (idx: number) => (evt: DragEvent): void => {
@@ -497,10 +464,13 @@ class IncidenteRoute extends React.Component<Props, State> {
   }): void => {
     const { selectedFeatureIndex: currentSelectionIndex } = this.state;
     if (
+      selectedFeatureIndex !== undefined &&
+      selectedFeatureIndex >= 0 &&
       selectedFeatureIndex !== currentSelectionIndex &&
       selectedFeature?.geometry.type === 'Polygon'
     ) {
       this.setState({ editMode: EditMode.EDIT, selectedFeatureIndex });
+      this.drawPolygonMode = new DrawPolygonMode();
     }
 
     if (currentSelectionIndex !== undefined && selectedFeature === null) {
@@ -519,6 +489,7 @@ class IncidenteRoute extends React.Component<Props, State> {
     editType: string;
     editContext: any;
   }): void => {
+    console.log('editType', editType);
     switch (editType) {
       case EditType.MOVE_POSITION:
       case EditType.ADD_FEATURE: {
@@ -536,7 +507,7 @@ class IncidenteRoute extends React.Component<Props, State> {
   };
 
   handleFeatureStyle = ({
-    feature,
+    // feature,
     state,
   }: {
     feature: Feature;
@@ -545,20 +516,27 @@ class IncidenteRoute extends React.Component<Props, State> {
     switch (state) {
       case RENDER_STATE.UNCOMMITTED: {
         return {
-          stroke: 'black',
-          fill: 'red',
+          stroke: 'rgb(100,100,100)',
+          strokeDasharray: '4,2',
+          strokeWidth: 2,
+          fill: 'rgb(189,189,189)',
+          fillOpacity: 0.1,
         };
       }
-      case RENDER_STATE.HOVERED: {
+      case RENDER_STATE.SELECTED: {
         return {
-          stroke: 'cyan',
-          fill: 'lime',
+          stroke: 'rgb(38, 181, 242)',
+          strokeWidth: 2,
+          fill: 'rgb(38, 181, 242)',
+          fillOpacity: 0.3,
         };
       }
       default: {
         return {
-          stroke: 'blue',
-          fill: 'yellow',
+          stroke: '#000000',
+          strokeWidth: 2,
+          fill: '#a9a9a9',
+          fillOpacity: 0.5,
         };
       }
     }
@@ -566,7 +544,6 @@ class IncidenteRoute extends React.Component<Props, State> {
 
   reset = (): void => {
     this.setState({
-      nivelAcionamento: undefined,
       geometryType: undefined,
       currentAddress: undefined,
       selectedFeatureIndex: undefined,
@@ -574,6 +551,8 @@ class IncidenteRoute extends React.Component<Props, State> {
       editMode: EditMode.NONE,
       locations: [],
     });
+    this.editingMode = new EditingMode();
+    this.drawPolygonMode = new DrawPolygonMode();
   };
 
   render(): JSX.Element {
@@ -651,9 +630,9 @@ class IncidenteRoute extends React.Component<Props, State> {
                 selectable
                 mode={
                   editMode === EditMode.DRAW
-                    ? DRAW_POLYGON_MODE
+                    ? this.drawPolygonMode
                     : editMode === EditMode.EDIT
-                    ? EDITING_MODE
+                    ? this.editingMode
                     : undefined
                 }
                 featureStyle={this.handleFeatureStyle}
@@ -674,6 +653,7 @@ class IncidenteRoute extends React.Component<Props, State> {
         <BottomDrawer
           isVisible={bottomDrawerOpen}
           onClose={this.handleBottomDrawerClose}
+          onCloseClick={this.reset}
         >
           {this.renderDrawerContent()}
         </BottomDrawer>
