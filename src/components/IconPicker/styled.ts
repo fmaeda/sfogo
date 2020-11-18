@@ -13,6 +13,9 @@ export const Container = styled.div<ItemProps>`
   margin: 8px;
   width: 64px;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  align-self: stretch;
 
   > svg {
     font-size: 24px;
@@ -26,7 +29,7 @@ export const Container = styled.div<ItemProps>`
     selected &&
     `
     background: whitesmoke;
-    color: #454C5D;
+    color: #5C6B73;
     box-shadow: inset 2px 2px 8px -4px rgba(0, 0, 0, 0.3);
     > span {
       color: whitesmoke;
@@ -38,10 +41,12 @@ export const Container = styled.div<ItemProps>`
 export const Label = styled.div`
   margin-top: 8px;
   font-size: 12px;
+  text-align: center;
   color: rgba(0, 0, 0, 0.7);
 `;
 
 export const Description = styled.div`
   font-size: 10px;
+  text-align: center;
   color: rgba(0, 0, 0, 0.5);
 `;

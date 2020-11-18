@@ -2,14 +2,15 @@ import styled from 'styles';
 
 type Props = {
   color?: string;
+  disabled?: boolean;
 };
 export const Container = styled.div<Props>`
   display: flex;
   flex-direction: row;
   background: ${({ color }) => color ?? 'transparent'};
   box-shadow: 2px 2px 12px -4px rgba(0, 0, 0, 0.3);
-  border-radius: 100px;
-  padding: 8px 20px;
+  border-radius: 40px;
+  position: relative;
   user-select: none;
   transition: all 0.2s ease-in-out;
   /* background-image: -webkit-radial-gradient(
@@ -20,7 +21,23 @@ export const Container = styled.div<Props>`
   );
   color: whitesmoke; */
 
-  :active {
-    box-shadow: 2px 2px 8px -4px rgba(0, 0, 0, 0.3);
-  }
+  ${({ disabled }) =>
+    !!disabled
+      ? `
+    opacity: 0.5;
+  `
+      : `
+    :active {
+      box-shadow: 2px 2px 8px -4px rgba(0, 0, 0, 0.3);
+    }
+  `}
+`;
+
+export const RippleContainer = styled.div`
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  padding: 8px 20px;
+  border-radius: 100px;
+  mask-image: radial-gradient(white, black);
 `;

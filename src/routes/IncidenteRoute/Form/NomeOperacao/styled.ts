@@ -52,4 +52,8 @@ export const Input = styled.input<CollapsedProps>`
     opacity: 0;
     /* transform: translateY(20px); */
   `};
+
+  ::placeholder {
+    color: rgba(0, 0, 0, 0.2);
+  }
 `;

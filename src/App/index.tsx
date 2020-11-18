@@ -78,7 +78,7 @@ class App extends React.Component<Props> {
       },
     });
     document.addEventListener('visibilitychange', () => {
-      navigator.serviceWorker.getRegistration().then((reg) => {
+      navigator.serviceWorker?.getRegistration().then((reg) => {
         if (document.visibilityState === 'visible') {
           console.log('checking for updates...');
           reg?.update();
@@ -100,6 +100,7 @@ class App extends React.Component<Props> {
               <Logo src={sisfogoLogo} />
               <Avatar />
               <Route path="/" component={Menu} />
+              <Version>v.: {process.env.REACT_APP_BUILD_TIME}</Version>
             </SideBar>
           </MenuContainer>
           <ContentBackground drawerOpen={mainMenuOpen}>
@@ -111,7 +112,6 @@ class App extends React.Component<Props> {
             </Content>
           </ContentBackground>
         </Container>
-        <Version>{process.env.REACT_APP_BUILD_TIME}</Version>
       </Router>
     );
   }

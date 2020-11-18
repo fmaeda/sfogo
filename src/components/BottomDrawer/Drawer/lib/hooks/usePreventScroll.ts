@@ -10,7 +10,7 @@ function usePreventScroll(enabled: boolean, contentWrapperClass: string): any {
     const scrollableElement = document.querySelector(`.${contentWrapperClass}`);
 
     disableBodyScroll(scrollableElement);
-    console.log('Disable body scrol');
+    // console.log('Disable body scrol');
 
     return () => {
       enableBodyScroll(scrollableElement);

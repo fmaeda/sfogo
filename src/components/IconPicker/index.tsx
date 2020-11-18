@@ -1,4 +1,5 @@
 import React from 'react';
+import Ripple from 'components/Ripple';
 import { Container, Label, Description } from './styled';
 
 type Props = {
@@ -18,6 +19,7 @@ class IconPicker extends React.Component<Props> {
         <Icon />
         {label && <Label>{label}</Label>}
         {description && <Description>{description}</Description>}
+        <Ripple color="lightgray" />
       </Container>
     );
   }

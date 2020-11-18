@@ -42,6 +42,7 @@ import {
   ConfirmContainer,
   DrawerContent,
   MapContainer,
+  AddressContainer,
 } from './styled';
 import SearchBox, { Result } from 'components/SearchBox';
 import Address from 'components/Address';
@@ -172,7 +173,7 @@ class IncidenteRoute extends React.Component<Props, State> {
     }).fitBounds(
       [
         [longitude, latitude],
-        [longitude, latitude - 0.0035],
+        [longitude, latitude - 0.0025],
       ],
       {
         offset: [0, -160],
@@ -194,7 +195,9 @@ class IncidenteRoute extends React.Component<Props, State> {
     featureCentroid: Feature<Point>,
   ): void => {
     const { viewport } = this.state;
-    console.log('bbox', boundingBox);
+    const bottomPadding = window.innerHeight / 2 + 50;
+    console.log('bottomPadding', bottomPadding);
+    // console.log('bbox', boundingBox);
     const { longitude, latitude, zoom } = new WebMercatorViewport(
       viewport,
     ).fitBounds(
@@ -206,7 +209,7 @@ class IncidenteRoute extends React.Component<Props, State> {
         padding: {
           top: 100,
           right: 50,
-          bottom: 300,
+          bottom: bottomPadding,
           left: 50,
         },
       },
@@ -408,13 +411,6 @@ class IncidenteRoute extends React.Component<Props, State> {
       case EditMode.INPUT_DETAILS: {
         return (
           <DrawerContent>
-            {currentAddress && (
-              <Address
-                uf={currentAddress.uf}
-                municipio={currentAddress.municipio}
-                descricao={currentAddress.descricao}
-              />
-            )}
             <Form />
           </DrawerContent>
         );
@@ -561,7 +557,8 @@ class IncidenteRoute extends React.Component<Props, State> {
       editMode,
       bottomDrawerOpen,
       geometryType,
-      locations: polygons,
+      currentAddress,
+      locations,
       selectedFeatureIndex,
     } = this.state;
     // console.log('polygons', polygons);
@@ -573,6 +570,15 @@ class IncidenteRoute extends React.Component<Props, State> {
           <SearchContainer>
             <SearchBox onSelect={this.handleResultSelect} />
           </SearchContainer>
+        )}
+        {currentAddress && (
+          <AddressContainer>
+            <Address
+              uf={currentAddress.uf}
+              municipio={currentAddress.municipio}
+              descricao={currentAddress.descricao}
+            />
+          </AddressContainer>
         )}
         <MapContainer>
           <ReactMapGL
@@ -606,7 +612,7 @@ class IncidenteRoute extends React.Component<Props, State> {
               ],
             }}
           >
-            {polygons
+            {locations
               .filter((p) => p.geometry.type === 'Point')
               .map((p) => p.geometry as Point)
               .map((marker, idx) => (
@@ -638,7 +644,7 @@ class IncidenteRoute extends React.Component<Props, State> {
                 featureStyle={this.handleFeatureStyle}
                 featuresDraggable
                 selectedFeatureIndex={selectedFeatureIndex}
-                features={polygons as NebulaFeature[]}
+                features={locations as NebulaFeature[]}
                 onSelect={this.handlePolygonSelect}
                 onUpdate={this.handlePolygonUpdate}
               />

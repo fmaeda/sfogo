@@ -13,14 +13,13 @@ export enum TipoDeteccao {
 export const tipoDeteccaoLabels: {
   [key in TipoDeteccao]: string;
 } = {
-  [TipoDeteccao.COMUNICACAO_PROPRIETARIO]:
-    'Comunicação por Assentado/Proprietário',
-  [TipoDeteccao.COMUNICACAO_INDIGENA]: 'Comunicação por Indígena',
-  [TipoDeteccao.COMUNICACAO_MORADOR]: 'Comunicação por Morador do Entorno',
-  [TipoDeteccao.MONITORAMENTO_SATELITE]: 'Monitoramento por Satélite',
+  [TipoDeteccao.COMUNICACAO_PROPRIETARIO]: 'Proprietário',
+  [TipoDeteccao.COMUNICACAO_INDIGENA]: 'Indígena',
+  [TipoDeteccao.COMUNICACAO_MORADOR]: 'Morador Entorno',
+  [TipoDeteccao.MONITORAMENTO_SATELITE]: 'Satélite',
   [TipoDeteccao.PONTOS_OBSERVACAO]: 'Pontos de Observação',
   [TipoDeteccao.RONDA]: 'Ronda',
-  [TipoDeteccao.DURANTE_COMBATE]: 'Verificado Durante Combate',
-  [TipoDeteccao.TELEFONE]: 'Via Telefone',
+  [TipoDeteccao.DURANTE_COMBATE]: 'Durante Combate',
+  [TipoDeteccao.TELEFONE]: 'Telefone',
   [TipoDeteccao.OUTROS]: 'Outros',
 };

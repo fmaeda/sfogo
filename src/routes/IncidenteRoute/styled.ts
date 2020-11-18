@@ -5,7 +5,7 @@ export const Content = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden;
+  /* overflow: hidden; */
   transition: all 0.2s ease-in-out;
   /* border: solid cyan; */
 `;
@@ -17,7 +17,7 @@ export const MapContainer = styled.div`
     width: 100% !important;
     /* height: 100% !important; */
     /* border-radius: 0 0 12px 12px !important; */
-    overflow: hidden !important;
+    /* overflow: hidden !important; */
     box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5);
     /* border: solid red; */
   }
@@ -60,7 +60,7 @@ export const SearchContainer = styled.span`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  z-index: 1;
   top: 70px;
   left: 0;
   right: 0;
@@ -105,4 +105,21 @@ export const DrawerContent = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+`;
+
+export const AddressContainer = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1;
+  top: 58px;
+  left: 12px;
+  right: 12px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.7);
+  background: white;
+  box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.3);
+  /* backdrop-filter: blur(1px); */
 `;

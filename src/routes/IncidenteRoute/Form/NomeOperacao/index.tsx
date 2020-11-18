@@ -6,60 +6,52 @@ import { Container, ButtonsRow, Input } from './styled';
 import DrawerCard from 'components/BottomDrawer/DrawerCard';
 
 type Props = {
-  value?: string;
-  onChange: (value?: string) => void;
+  nomeOperacao?: string;
+  hasNomeOperacao?: boolean;
+  onChange: (hasNomeOperacao: boolean, nomeOperacao?: string) => void;
 };
 
-type State = {
-  hasName?: boolean;
-};
-
-class NomeOperacao extends React.Component<Props, State> {
+class NomeOperacao extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasName: props.value === undefined ? undefined : !!props.value,
-    };
   }
 
-  handleClick = (hasName: boolean) => (): void => {
-    this.setState({ hasName });
-    if (hasName === false) {
-      const { onChange } = this.props;
-      onChange(undefined);
-    }
+  handleClick = (hasNomeOperacao: boolean) => (): void => {
+    const { onChange, nomeOperacao } = this.props;
+    onChange(hasNomeOperacao, !!hasNomeOperacao ? nomeOperacao : undefined);
   };
 
   handleChange = (evt: React.ChangeEvent<HTMLInputElement>): void => {
     const { onChange } = this.props;
-    onChange(evt.target.value);
+    onChange(true, evt.target.value);
   };
 
   render(): JSX.Element {
-    const { hasName } = this.state;
-    const { value } = this.props;
+    const { nomeOperacao: value, hasNomeOperacao } = this.props;
 
     return (
       <DrawerCard title="A Operação possui nome?">
         <Container>
-          <ButtonsRow collapsed={!!hasName}>
+          <ButtonsRow collapsed={!!hasNomeOperacao}>
             <IconPicker
               icon={FaThumbsDown}
               label="Não"
               onClick={this.handleClick(false)}
-              selected={hasName === false}
+              selected={hasNomeOperacao === false}
             />
             <IconPicker
               icon={FaThumbsUp}
               label="Sim"
               onClick={this.handleClick(true)}
-              selected={hasName === true}
+              selected={hasNomeOperacao === true}
             />
           </ButtonsRow>
           <Input
             type="text"
-            collapsed={!hasName}
+            placeholder="Nome da Operação..."
+            collapsed={!hasNomeOperacao}
             value={value ?? ''}
+            disabled={!hasNomeOperacao}
             onChange={this.handleChange}
           />
         </Container>

@@ -10,7 +10,7 @@ export const Container = styled.div`
   display: flex;
   flex: 1;
   flex-direction: row;
-  overflow: hidden;
+  /* overflow: hidden; */
   /* width: 100vw;
   height: 100vh; */
   /* background-color: yellow; */
@@ -44,7 +44,7 @@ export const ContentBackground = styled.div<DrawerProps>`
   top: 0;
   bottom: 0;
   right: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   transition: all 0.2s ease-in-out;
   ${({ drawerOpen }) => `
     transform: translateX(${drawerOpen ? '220px' : '0px'});
@@ -59,7 +59,7 @@ export const Content = styled.div<DrawerProps>`
   flex-direction: column;
   flex: 1;
   transition: all 0.2s ease-in-out;
-  overflow: hidden;
+  /* overflow: hidden; */
   border-radius: ${({ drawerOpen }) => (drawerOpen ? '12px' : '0')};
   /* box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5); */
   background: #363b49;
@@ -74,6 +74,7 @@ export const Content = styled.div<DrawerProps>`
 
 export const SideBar = styled.div<DrawerProps>`
   display: flex;
+  position: relative;
   flex-direction: column;
   align-items: center;
   min-width: 240px;
@@ -103,7 +104,7 @@ export const Logo = styled.img`
 
 export const BlurryPanel = styled.div`
   position: absolute;
-  z-index: 3;
+  z-index: 9999;
   top: 0;
   bottom: 0;
   right: 0;
@@ -114,5 +115,5 @@ export const Version = styled.div`
   position: absolute;
   bottom: 8px;
   left: 8px;
-  background: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5);
 `;

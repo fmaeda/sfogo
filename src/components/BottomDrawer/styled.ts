@@ -7,7 +7,7 @@ export const Container = styled.span`
     bottom: 0;
     height: unset;
     filter: drop-shadow(-2px -2px 2px rgba(0, 0, 0, 0.2));
-    max-height: 60%;
+    /* max-height: 60%; */
   }
   color: rgba(0, 0, 0, 0.7);
   /* position: fixed; */
@@ -18,8 +18,9 @@ export const Content = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 20vh;
-  /* border: solid red; */
+  /* min-height: 40vh; */
+  flex: 1;
+  /* border: solid cyan; */
 `;
 
 export const CloseContainer = styled.div`

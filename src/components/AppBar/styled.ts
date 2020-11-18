@@ -1,7 +1,7 @@
 import styled from 'styles';
 
 export const Container = styled.span`
-  z-index: 2;
+  /* z-index: 2; */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
