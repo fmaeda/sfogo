@@ -1,8 +1,6 @@
 import React from 'react';
 
 import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 import { Container, Content, ButtonBar } from './styled';
 import { NivelAcionamento } from 'model/nivelAcionamento';
 import NivelAcionamentoPicker from './NivelAcionamentoPicker';

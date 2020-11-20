@@ -3,7 +3,7 @@ import { GiHamburgerMenu } from 'react-icons/gi';
 
 import { connect } from 'react-redux';
 
-import { Container } from './styled';
+import { Container, Content } from './styled';
 import { menuActions } from 'store/menu/index';
 
 type Props = {

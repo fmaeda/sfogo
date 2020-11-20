@@ -1,22 +1,14 @@
 import {
   NivelAcionamento,
+  nivelAcionamentoIcons,
   nivelAcionamentoLabels,
 } from 'model/nivelAcionamento';
 import React from 'react';
 
 import { $enum } from 'ts-enum-util';
-import { FaLandmark, FaCity } from 'react-icons/fa';
-import { GiBrazil } from 'react-icons/gi';
 
 import IconPicker from 'components/IconPicker';
-
 import DrawerCard from 'components/BottomDrawer/DrawerCard';
-
-const iconMappings: { [key in NivelAcionamento]: React.ComponentType } = {
-  [NivelAcionamento.MUNICIPAL]: FaCity,
-  [NivelAcionamento.ESTADUAL]: FaLandmark,
-  [NivelAcionamento.FEDERAL]: GiBrazil,
-};
 
 const labelMappings: { [key in NivelAcionamento]: string } = {
   [NivelAcionamento.MUNICIPAL]: 'Nível 1',
@@ -43,7 +35,7 @@ class NivelAcionamentoPicker extends React.Component<Props> {
         {$enum(NivelAcionamento).map((nivel) => (
           <IconPicker
             key={`item_${nivel}`}
-            icon={iconMappings[nivel]}
+            icon={nivelAcionamentoIcons[nivel]}
             label={labelMappings[nivel]}
             description={`(${nivelAcionamentoLabels[nivel]})`}
             onClick={this.handleClick(nivel)}

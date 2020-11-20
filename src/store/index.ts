@@ -5,6 +5,7 @@ import { StateType } from 'typesafe-actions';
 import { versionReducer } from 'store/version';
 import { notificationReducer } from 'store/notification';
 import { menuReducer } from './menu';
+import { incidenteReducer } from './incidente';
 
 const allReducers = {
   // product: productReducer,
@@ -12,6 +13,7 @@ const allReducers = {
   version: versionReducer,
   notification: notificationReducer,
   menu: menuReducer,
+  incidente: incidenteReducer,
 };
 
 export type RootState = StateType<typeof allReducers>;

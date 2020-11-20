@@ -23,6 +23,21 @@ export const MapContainer = styled.div`
   }
 `;
 
+export const IncidentesContainer = styled.div`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  /* max-width: 90%; */
+  /* right: 50%; */
+  /* transform: translateX(-50%); */
+  /* border: solid lime; */
+`;
+
 export const FabContainer = styled.span`
   position: absolute;
   display: flex;
@@ -61,7 +76,7 @@ export const SearchContainer = styled.span`
   align-items: center;
   justify-content: center;
   z-index: 1;
-  top: 70px;
+  top: 60px;
   left: 0;
   right: 0;
   /* border: solid red; */

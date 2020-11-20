@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import { ConnectedComponent, Provider } from 'react-redux';
 import { ThemeProvider } from 'emotion-theming';
 import { SnackbarProvider } from 'notistack';

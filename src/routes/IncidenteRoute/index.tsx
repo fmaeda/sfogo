@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import ReactMapGL, {
   FlyToInterpolator,
   ViewportProps,
@@ -43,6 +44,7 @@ import {
   DrawerContent,
   MapContainer,
   AddressContainer,
+  IncidentesContainer,
 } from './styled';
 import SearchBox, { Result } from 'components/SearchBox';
 import Address from 'components/Address';
@@ -54,6 +56,10 @@ import { BBox, Feature, Point } from 'geojson';
 import { Feature as NebulaFeature } from 'typings/nebula.gl';
 import Form from './Form';
 import DrawerCard from 'components/BottomDrawer/DrawerCard';
+import TabBar, { TabBarItem } from 'components/TabBar/index';
+import { RootState } from 'store';
+import IncidentesList from './IncidentesList';
+import { incidenteActions } from 'store/incidente/index';
 
 enum EditType {
   ADD_TENTATIVE_POSITION = 'addTentativePosition',
@@ -74,7 +80,13 @@ type AddressDetails = {
   addresstype: string;
 } & Record<string, string>;
 
-type Props = {};
+const mapStateToProps = ({ incidente: { incidentesList } }: RootState) => ({
+  incidentesList,
+});
+
+type Props = {
+  setIncidenteList: typeof incidenteActions.setIncidenteList;
+} & ReturnType<typeof mapStateToProps>;
 
 type State = {
   viewport: Partial<ViewportProps>;
@@ -551,6 +563,11 @@ class IncidenteRoute extends React.Component<Props, State> {
     this.drawPolygonMode = new DrawPolygonMode();
   };
 
+  handleListClose = (): void => {
+    const { setIncidenteList } = this.props;
+    setIncidenteList([]);
+  };
+
   render(): JSX.Element {
     const {
       viewport,
@@ -561,11 +578,12 @@ class IncidenteRoute extends React.Component<Props, State> {
       locations,
       selectedFeatureIndex,
     } = this.state;
+    const { incidentesList } = this.props;
+
     // console.log('polygons', polygons);
     return (
       <Content>
         <AppBar title="Registro de Incidente" />
-
         {!bottomDrawerOpen && (
           <SearchContainer>
             <SearchBox onSelect={this.handleResultSelect} />
@@ -655,7 +673,16 @@ class IncidenteRoute extends React.Component<Props, State> {
           <FaLayerGroup size={20} />
           <MdMyLocation size={20} onClick={this.handleCurrentLocationClick} />
         </ActionButtons>
-        <FabContainer>{this.renderFabArea()}</FabContainer>
+        {incidentesList.length > 0 ? (
+          <IncidentesContainer>
+            <IncidentesList
+              incidentes={incidentesList}
+              onClose={this.handleListClose}
+            />
+          </IncidentesContainer>
+        ) : (
+          <FabContainer>{this.renderFabArea()}</FabContainer>
+        )}
         <BottomDrawer
           isVisible={bottomDrawerOpen}
           onClose={this.handleBottomDrawerClose}
@@ -663,9 +690,15 @@ class IncidenteRoute extends React.Component<Props, State> {
         >
           {this.renderDrawerContent()}
         </BottomDrawer>
+        {/* <TabBar>
+          <TabBarItem label="REGISTRO" selected />
+          <TabBarItem label="CONSULTA" />
+        </TabBar> */}
       </Content>
     );
   }
 }
 
-export default IncidenteRoute;
+export default connect(mapStateToProps, {
+  setIncidenteList: incidenteActions.setIncidenteList,
+})(IncidenteRoute);
