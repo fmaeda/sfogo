@@ -60,6 +60,7 @@ import TabBar, { TabBarItem } from 'components/TabBar/index';
 import { RootState } from 'store';
 import IncidentesList from './IncidentesList';
 import { incidenteActions } from 'store/incidente/index';
+import MyLocation from 'components/MyLocation';
 
 enum EditType {
   ADD_TENTATIVE_POSITION = 'addTentativePosition',
@@ -92,6 +93,10 @@ type State = {
   viewport: Partial<ViewportProps>;
   bottomDrawerOpen: boolean;
   editMode: EditMode;
+  currentLocation?: {
+    latitude: number;
+    longitude: number;
+  };
   currentAddress?: {
     uf: string;
     municipio: string;
@@ -167,7 +172,15 @@ class IncidenteRoute extends React.Component<Props, State> {
     const {
       coords: { latitude, longitude },
     } = await this.getCurrentLocation();
-    this.flyTo(longitude, latitude);
+    this.setState(
+      {
+        currentLocation: {
+          latitude,
+          longitude,
+        },
+      },
+      () => this.flyTo(longitude, latitude),
+    );
   };
 
   flyToPreview = ({
@@ -577,6 +590,7 @@ class IncidenteRoute extends React.Component<Props, State> {
       currentAddress,
       locations,
       selectedFeatureIndex,
+      currentLocation,
     } = this.state;
     const { incidentesList } = this.props;
 
@@ -630,6 +644,15 @@ class IncidenteRoute extends React.Component<Props, State> {
               ],
             }}
           >
+            {currentLocation && (
+              <Marker
+                longitude={currentLocation.longitude}
+                latitude={currentLocation.latitude}
+                draggable={false}
+              >
+                <MyLocation />
+              </Marker>
+            )}
             {locations
               .filter((p) => p.geometry.type === 'Point')
               .map((p) => p.geometry as Point)

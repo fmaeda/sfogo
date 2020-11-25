@@ -1,9 +1,6 @@
 import styled from 'styles';
 
 export const Container = styled.div`
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
   display: flex;
   flex-direction: row;
   color: rgba(0, 0, 0, 0.4);
@@ -11,7 +8,7 @@ export const Container = styled.div`
   > span {
     display: flex;
     flex-direction: row;
-    margin: 6px;
+    margin: 2px 6px;
     font-size: 11px;
 
     > svg {

@@ -4,13 +4,16 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   /* border: solid red; */
   .slick-track {
     display: flex;
     flex-direction: row;
     align-items: flex-end;
+    /* justify-content: center; */
     flex: 1;
+    /* border: solid yellow; */
+    /* height: 400px; */
   }
   .slick-slide {
     /* display: flex; */
@@ -20,7 +23,7 @@ export const Container = styled.div`
     /* align-self: stretch; */
     /* justify-self: stretch; */
     /* height: 140px; */
-    /* border: solid blue; */
+    /* border: solid red; */
   }
   div {
     outline: none;
@@ -30,22 +33,88 @@ export const Container = styled.div`
 
 type CardProps = {
   selected?: boolean;
+  flipped?: boolean;
 };
 export const CardContainer = styled.div<CardProps>`
   display: flex;
   position: relative;
   flex-direction: column;
   flex: 1;
-  background: white;
   border-radius: 8px;
   color: black;
-  margin: 40px 8px 8px 8px;
   align-self: stretch;
   justify-self: stretch;
   transition: all 0.2s ease-in-out;
-  height: ${({ selected }) => (!!selected ? '36vh' : '25vh')};
-  width: 80vw;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.2));
+  min-height: ${({ selected }) => (!!selected ? '36vh' : '25vh')};
+  min-height: ${({ flipped }) => (!!flipped ? '70vh' : '36vh')};
+  /* width: 80vw; */
+  min-width: ${({ flipped }) => (!!flipped ? '90vw' : '80vw')};
+  margin: 40px 8px 8px 8px;
+  perspective: 1000px;
+  /* border: solid blue; */
+`;
+
+type FlipProps = {
+  flipped?: boolean;
+};
+export const FlipContainer = styled.div<FlipProps>`
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  flex: 1;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  background: white;
+  border-radius: 8px;
+  /* margin: 8px; */
+  /* overflow: hidden; */
+  ${({ flipped }) => flipped && `transform: rotateY(180deg);`}
+`;
+
+export const FrontCard = styled.div`
+  /* position: absolute; */
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  filter: drop-shadow(0px 0px 0px transparent);
+  /* background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.01),
+    rgba(255, 255, 255, 0.5)
+  ); */
+  box-shadow: 0 0px 4px 0px rgba(0, 0, 0, 0.2);
+  min-height: 120px;
+  border-radius: 8px;
+  /* height: 300px; */
+  backface-visibility: visible;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  /* transform: rotateY(0deg); */
+  /* border: solid red; */
+`;
+
+export const BackCard = styled.div`
+  transform: rotateY(180deg);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 20px 12px;
+  /* border: solid red; */
+  border-radius: 8px;
+  /* background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.1)
+  ); */
+  box-shadow: 0 0px 4px 0px rgba(0, 0, 0, 0.2);
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+  backface-visibility: hidden;
 `;
 
 export const IconContainer = styled.div<CardProps>`
@@ -104,8 +173,14 @@ export const DetailsContainer = styled.div`
 `;
 
 export const ButtonBar = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
   display: flex;
   flex-direction: row;
+  border-radius: 0 0 8px 8px;
   /* border: solid red; */
   align-self: stretch;
   border-top: 1px solid silver;
@@ -126,6 +201,12 @@ export const CloseContainer = styled.div`
   position: absolute;
   top: 8px;
   right: 8px;
-  font-size: 20px;
+  font-size: 18px;
   color: rgba(0, 0, 0, 0.3);
+`;
+
+export const DateContainer = styled.div`
+  position: absolute;
+  bottom: 50px;
+  right: 0;
 `;
