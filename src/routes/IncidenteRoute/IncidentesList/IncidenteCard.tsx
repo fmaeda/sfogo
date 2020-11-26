@@ -34,6 +34,7 @@ type Props = {
   incidente: Incidente;
   selected?: boolean;
   onCloseClick?: () => void;
+  onDetailsToggle?: (visble: boolean) => void;
 };
 
 type State = {
@@ -46,7 +47,7 @@ class IncidenteCard extends React.Component<Props, State> {
   };
 
   render(): JSX.Element {
-    const { incidente, selected, onCloseClick } = this.props;
+    const { incidente, selected, onCloseClick, onDetailsToggle } = this.props;
     const { flipped } = this.state;
 
     const Icon = nivelAcionamentoIcons[incidente.nivelAcionamento];
@@ -90,7 +91,11 @@ class IncidenteCard extends React.Component<Props, State> {
               <IconButton
                 icon={MdMoreHoriz}
                 label="Mais"
-                onClick={() => this.setState({ flipped: true })}
+                onClick={() =>
+                  this.setState({ flipped: true }, () =>
+                    onDetailsToggle?.(true),
+                  )
+                }
               />
             </ButtonBar>
             {/* )} */}
@@ -98,7 +103,11 @@ class IncidenteCard extends React.Component<Props, State> {
           <BackCard>
             <CloseContainer>
               <MdChevronLeft
-                onClick={() => this.setState({ flipped: false })}
+                onClick={() =>
+                  this.setState({ flipped: false }, () =>
+                    onDetailsToggle?.(false),
+                  )
+                }
               />
             </CloseContainer>
             {localidade && (
@@ -121,7 +130,11 @@ class IncidenteCard extends React.Component<Props, State> {
               <IconButton
                 icon={MdChevronLeft}
                 label="Voltar"
-                onClick={() => this.setState({ flipped: false })}
+                onClick={() =>
+                  this.setState({ flipped: false }, () =>
+                    onDetailsToggle?.(false),
+                  )
+                }
               />
               {/* <IconButton
                 icon={MdMoreHoriz}

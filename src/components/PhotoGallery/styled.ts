@@ -15,13 +15,18 @@ export const Container = styled.div`
   }
 `;
 
-export const CardContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  border-radius: 8px;
+type CardProps = {
+  img: string;
+};
+export const CardContainer = styled.div<CardProps>`
+  /* background: url(${({ img }) => img}) 50% 50% no-repeat;
+  min-width: 100px;
+  min-height: 100px; */
+  margin: 0 8px;
   > img {
-    border: solid red;
-    /* width: 80px; */
-    /* height: 80px; */
+    border-radius: 16px;
+    object-fit: cover;
+    width: 80px;
+    height: 80px;
   }
 `;

@@ -12,14 +12,20 @@ type Props = {
 
 type State = {
   currentPage: number;
+  lockSwipe: boolean;
 };
 
 class IncidentesList extends React.Component<Props, State> {
   state: State = {
     currentPage: 0,
+    lockSwipe: false,
   };
 
   sliderRef = React.createRef<Slider>();
+
+  handleToggleDetails = (visible: boolean): void => {
+    this.setState({ lockSwipe: visible });
+  };
 
   renderCard = (currentPage: number) => (
     incidente: Incidente,
@@ -33,6 +39,7 @@ class IncidentesList extends React.Component<Props, State> {
         incidente={incidente}
         selected={currentPage === pageIndex}
         onCloseClick={onClose}
+        onDetailsToggle={this.handleToggleDetails}
       />
     );
   };
@@ -43,7 +50,7 @@ class IncidentesList extends React.Component<Props, State> {
 
   render(): JSX.Element {
     const { incidentes } = this.props;
-    const { currentPage } = this.state;
+    const { currentPage, lockSwipe } = this.state;
 
     return (
       <Container>
@@ -57,6 +64,7 @@ class IncidentesList extends React.Component<Props, State> {
           centerMode
           variableWidth
           arrows={false}
+          swipe={!lockSwipe}
           afterChange={this.handlePageChange}
         >
           {incidentes.map(this.renderCard(currentPage))}

@@ -3,27 +3,16 @@ import styled from 'styles';
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
-  /* height: 100%; */
-  /* border: solid red; */
+  flex: 1;
+  align-self: stretch;
+  /* width: 100%; */
   .slick-track {
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    /* justify-content: center; */
     flex: 1;
-    /* border: solid yellow; */
-    /* height: 400px; */
   }
   .slick-slide {
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* align-items: center; */
-    /* flex: 1; */
-    /* align-self: stretch; */
-    /* justify-self: stretch; */
-    /* height: 140px; */
-    /* border: solid red; */
   }
   div {
     outline: none;
@@ -45,8 +34,13 @@ export const CardContainer = styled.div<CardProps>`
   align-self: stretch;
   justify-self: stretch;
   transition: all 0.2s ease-in-out;
-  min-height: ${({ selected }) => (!!selected ? '36vh' : '25vh')};
-  min-height: ${({ flipped }) => (!!flipped ? '70vh' : '36vh')};
+  min-height: ${({ selected, flipped }) => {
+    if (!!flipped) {
+      return '70vh';
+    } else {
+      return !!selected ? '36vh' : '30vh';
+    }
+  }};
   /* width: 80vw; */
   min-width: ${({ flipped }) => (!!flipped ? '90vw' : '80vw')};
   margin: 40px 8px 8px 8px;

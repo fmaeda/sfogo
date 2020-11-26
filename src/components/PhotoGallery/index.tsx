@@ -1,5 +1,7 @@
 import React from 'react';
 import Slider from 'react-slick';
+import Lightbox from 'react-image-lightbox';
+import 'react-image-lightbox/style.css';
 
 import { CardContainer, Container } from './styled';
 
@@ -9,11 +11,13 @@ import { Imagem } from 'model/imagem';
 type Props = {};
 type State = {
   currentPage: number;
+  showLightbox: boolean;
 };
 
 class PhotoGallery extends React.Component<Props, State> {
   state: State = {
     currentPage: 0,
+    showLightbox: false,
   };
 
   sliderRef = React.createRef<Slider>();
@@ -22,17 +26,30 @@ class PhotoGallery extends React.Component<Props, State> {
     this.setState({ currentPage });
   };
 
-  renderCard = (currentPage: number) => (imagem: Imagem): JSX.Element => {
-    console.log('image', imagem.image);
+  renderCard = (currentPage: number) => (
+    imagem: Imagem,
+    idx: number,
+  ): JSX.Element => {
+    // console.log('image', imagem.image);
     return (
-      <CardContainer key={imagem.id}>
-        <img src={imagem.image} width={80} height={80} />
+      <CardContainer
+        key={imagem.id}
+        img={imagem.image}
+        onClick={() => {
+          this.setState({
+            currentPage: idx,
+            showLightbox: true,
+          });
+        }}
+      >
+        <img src={imagem.image} />
       </CardContainer>
     );
   };
 
   render(): JSX.Element {
-    const { currentPage } = this.state;
+    const { currentPage, showLightbox } = this.state;
+    const images = mockData.map(({ image }) => image);
 
     return (
       <Container>
@@ -50,6 +67,24 @@ class PhotoGallery extends React.Component<Props, State> {
         >
           {mockData.map(this.renderCard(currentPage))}
         </Slider>
+        {showLightbox && (
+          <Lightbox
+            mainSrc={images[currentPage]}
+            nextSrc={images[(currentPage + 1) % images.length]}
+            prevSrc={images[(currentPage + images.length - 1) % images.length]}
+            onCloseRequest={() => this.setState({ showLightbox: false })}
+            onMovePrevRequest={() => {
+              this.setState({
+                currentPage: (currentPage + images.length - 1) % images.length,
+              });
+            }}
+            onMoveNextRequest={() => {
+              this.setState({
+                currentPage: (currentPage + 1) % images.length,
+              });
+            }}
+          />
+        )}
       </Container>
     );
   }
