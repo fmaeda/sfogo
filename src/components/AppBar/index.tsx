@@ -1,14 +1,18 @@
 import React from 'react';
 import { GiHamburgerMenu } from 'react-icons/gi';
+import { MdArrowBack } from 'react-icons/md';
 
 import { connect } from 'react-redux';
 
-import { Container, Content } from './styled';
+import { Container, Content, TitleContainer } from './styled';
 import { menuActions } from 'store/menu/index';
 
 type Props = {
   setMenuOpen: typeof menuActions.setMenuOpen;
   title: string;
+  collapseTitle?: boolean;
+  onBackClick?: () => void;
+  children?: React.ReactNode;
 };
 
 class AppBar extends React.Component<Props> {
@@ -18,17 +22,23 @@ class AppBar extends React.Component<Props> {
   };
 
   render(): JSX.Element {
-    const { title } = this.props;
+    const { title, collapseTitle, children, onBackClick } = this.props;
 
     return (
       <Container>
-        <GiHamburgerMenu
-          size={20}
-          color="white"
-          onClick={this.handleMenuClick}
-        />
-        <h3>{title}</h3>
-        <GiHamburgerMenu size={20} color="transparent" />
+        {!collapseTitle ? (
+          <>
+            <GiHamburgerMenu
+              size={20}
+              color="white"
+              onClick={this.handleMenuClick}
+            />
+            <h3>{title}</h3>
+          </>
+        ) : (
+          <MdArrowBack size={20} color="white" onClick={onBackClick} />
+        )}
+        <Content collapsed={!collapseTitle}>{children}</Content>
       </Container>
     );
   }

@@ -23,7 +23,7 @@ export enum SearchMode {
 }
 
 type Props = {
-  mode: SearchMode;
+  mode?: SearchMode;
   onSelect: (mode: SearchMode) => void;
 };
 
@@ -33,7 +33,7 @@ type State = {
 
 class SearchModeSelector extends React.Component<Props, State> {
   state = {
-    isMenuVisible: false,
+    isMenuVisible: true,
   };
 
   handleSelect = (mode: SearchMode) => (): void => {

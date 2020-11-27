@@ -38,7 +38,7 @@ export const CardContainer = styled.div<CardProps>`
     if (!!flipped) {
       return '70vh';
     } else {
-      return !!selected ? '36vh' : '30vh';
+      return !!selected ? '44vh' : '30vh';
     }
   }};
   /* width: 80vw; */

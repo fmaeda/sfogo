@@ -46,7 +46,7 @@ import {
   AddressContainer,
   IncidentesContainer,
 } from './styled';
-import SearchBox, { Result } from 'components/SearchBox';
+import SearchBox from 'components/SearchBox';
 import Address from 'components/Address';
 import { MdMyLocation } from 'react-icons/md';
 import AppBar from 'components/AppBar';
@@ -61,6 +61,7 @@ import { RootState } from 'store';
 import IncidentesList from './IncidentesList';
 import { incidenteActions } from 'store/incidente/index';
 import MyLocation from 'components/MyLocation';
+import { LocalidadeResult } from 'model/localidade';
 
 enum EditType {
   ADD_TENTATIVE_POSITION = 'addTentativePosition',
@@ -105,6 +106,7 @@ type State = {
   locations: Feature[];
   selectedFeatureIndex?: number;
   geometryType?: GeometryType;
+  expandSearch: boolean;
 };
 
 const getAddressDescription = (address: AddressDetails): string => {
@@ -130,6 +132,7 @@ class IncidenteRoute extends React.Component<Props, State> {
     locations: [],
     bottomDrawerOpen: false,
     editMode: EditMode.NONE,
+    expandSearch: false,
   };
 
   editingMode = new EditingMode();
@@ -317,7 +320,7 @@ class IncidenteRoute extends React.Component<Props, State> {
       );
   };
 
-  handleResultSelect = (result: Result): void => {
+  handleResultSelect = (result: LocalidadeResult): void => {
     console.log('result', result.boundingbox);
     const [x, y, min, max] = result.boundingbox.map(Number);
     this.fitBounds([
@@ -591,18 +594,29 @@ class IncidenteRoute extends React.Component<Props, State> {
       locations,
       selectedFeatureIndex,
       currentLocation,
+      expandSearch,
     } = this.state;
     const { incidentesList } = this.props;
 
     // console.log('polygons', polygons);
     return (
       <Content>
-        <AppBar title="Registro de Incidente" />
-        {!bottomDrawerOpen && (
+        <AppBar
+          title="Registro de Incidente"
+          collapseTitle={expandSearch}
+          onBackClick={() => this.setState({ expandSearch: false })}
+        >
+          <SearchBox
+            onLocalidadeSelect={this.handleResultSelect}
+            collapsed={!expandSearch}
+            onExpandClick={() => this.setState({ expandSearch: true })}
+          />
+        </AppBar>
+        {/* {!bottomDrawerOpen && (
           <SearchContainer>
-            <SearchBox onSelect={this.handleResultSelect} />
+
           </SearchContainer>
-        )}
+        )} */}
         {currentAddress && (
           <AddressContainer>
             <Address

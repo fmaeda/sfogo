@@ -4,10 +4,12 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-  color: rgba(0, 0, 0, 0.4);
+  color: white;
+  margin: 12px 0;
   /* border: solid red; */
   margin-left: 12px;
-  border-right: 1px solid silver;
+  /* border-left: 1px solid silver; */
+  /* border: solid red; */
 `;
 
 export const SelectionContainer = styled.div`
@@ -39,7 +41,9 @@ export const OptionsContainer = styled.div`
   flex-direction: column;
   position: absolute;
   bottom: 0;
-  transform: translateY(120%);
+  right: 0;
+  transform: translateY(80px);
+  color: rgba(0, 0, 0, 0.5);
   /* border: solid blue; */
   background: white;
   border-radius: 4px;
